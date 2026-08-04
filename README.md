@@ -62,7 +62,23 @@ README. Skip it for now — the in-browser reminders work without it.
 
 ---
 
-## 3. Deploy to GitHub Pages
+## 3a. Deploy to Vercel (serves from the root domain)
+
+Vercel auto-detects Vite — **no base-path config needed** (the default is `/`).
+
+1. Push this repo to GitHub (see the commands below).
+2. On [vercel.com](https://vercel.com) → **Add New → Project** → import the repo.
+   Framework preset **Vite**, build `npm run build`, output `dist` (auto-filled).
+3. **Environment Variables** → add `VITE_SUPABASE_URL` and
+   `VITE_SUPABASE_ANON_KEY`, then Deploy.
+4. In **Supabase → Authentication → URL Configuration**, add your Vercel URL
+   (e.g. `https://your-app.vercel.app/`) to **Redirect URLs** so login works.
+
+> **White screen on Vercel?** That means the build used a GitHub Pages sub-path.
+> Make sure `VITE_BASE` is **not** set in your Vercel project env vars — Vercel
+> must build with the default base `/`.
+
+## 3b. Deploy to GitHub Pages (serves from /<repo>/)
 
 The repo ships a workflow (`.github/workflows/deploy.yml`) that builds and
 publishes to GitHub Pages on every push to `main`.

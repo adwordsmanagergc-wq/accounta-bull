@@ -36,6 +36,10 @@ jobs:
 
       - name: Build
         env:
+          # GitHub Pages project sites live under /<repo>/, so build with that
+          # base path. (Vercel/Netlify serve from "/", the default in vite.config.)
+          # Change this if your GitHub repo isn't named "accountabull-web".
+          VITE_BASE: /accountabull-web/
           # Supabase keys come from GitHub repo secrets so they aren't hard-coded.
           # Add these under: Settings -> Secrets and variables -> Actions -> New repository secret
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
