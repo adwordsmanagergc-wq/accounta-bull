@@ -23,7 +23,14 @@ export default function Landing() {
   return (
     <div className="app-shell landing">
       <div className="landing-logo">
-        <Logo size={240} glow />
+        <Logo size={230} glow />
+      </div>
+      <div className="wordmark-card">
+        <img
+          src={`${import.meta.env.BASE_URL}accountabullwordmark.webp`}
+          alt="Accounta-Bull"
+          className="wordmark-img"
+        />
       </div>
 
       <p className="landing-tagline">

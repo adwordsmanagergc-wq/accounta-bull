@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-// Drop your transparent logo at public/accountabulllogo.webp and it's used
-// automatically. Until then it falls back to the placeholder logo.svg.
-const primary = `${import.meta.env.BASE_URL}accountabulllogo.webp`
+// The bull crest (transparent) is the brand mark. Drop your own file at
+// public/accountabullcrest.webp to replace it; falls back to the placeholder.
+const primary = `${import.meta.env.BASE_URL}accountabullcrest.webp`
 const fallback = `${import.meta.env.BASE_URL}logo.svg`
 
 export default function Logo({ size = 200, glow = false }: { size?: number; glow?: boolean }) {

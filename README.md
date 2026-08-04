@@ -27,10 +27,16 @@ The app still loads without Supabase keys — but sign-up/login only work once
 
 ### Your logo
 
-Drop your transparent **`accountabulllogo.webp`** into the `public/` folder. It's
-used automatically and floats on the navy background with a soft brand glow;
-until then a placeholder (`public/logo.svg`) shows. Use a logo with a
-**transparent background** (not white) so it sits cleanly on the dark page.
+The landing page uses two assets in `public/`, both generated from your logo:
+
+- **`accountabullcrest.webp`** — the bull crest with the background removed. It's
+  the brand mark used across the app (landing, auth, profile) and floats on the
+  navy background with a soft glow.
+- **`accountabullwordmark.webp`** — the "Accounta-Bull" wordmark on a white card,
+  shown under the crest on the landing page so its navy text stays crisp.
+
+To swap in a new logo later, replace those two files (same names). If
+`accountabullcrest.webp` is missing, a placeholder (`public/logo.svg`) shows.
 
 ---
 

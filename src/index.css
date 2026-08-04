@@ -365,6 +365,22 @@ select {
   filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.55))
     drop-shadow(0 0 18px rgba(245, 130, 31, 0.25));
 }
+/* White card behind the wordmark so its navy text stays crisp on navy. */
+.wordmark-card {
+  margin: 6px auto 0;
+  width: fit-content;
+  max-width: 92%;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 10px 20px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(201, 169, 106, 0.25);
+}
+.wordmark-img {
+  display: block;
+  width: 100%;
+  max-width: 300px;
+  height: auto;
+}
 .landing-tagline {
   margin: 22px 4px 0;
   text-align: center;
