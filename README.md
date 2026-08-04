@@ -63,6 +63,23 @@ Row Level Security is enabled by the migration — every user can only read/writ
 their own `profiles`, `goals`, and `completions` rows; `boost_messages` is
 read-only to signed-in users.
 
+### Branding the auth emails (change "Supabase Auth" → "Accounta-Bull")
+
+Signup/login emails have two brandable parts:
+
+1. **Wording** (free, instant): **Authentication → Emails → Templates** → edit the
+   *Confirm signup*, *Magic Link*, and *Reset password* subjects and bodies to
+   your Accounta-Bull copy.
+2. **Sender name/address** (the "Supabase Auth <noreply@mail.app.supabase.io>"
+   line): the built-in mailer can't change this — you must enable **Custom SMTP**.
+   Reuse Resend (same provider as the boost emails):
+   - **Authentication → Emails → SMTP Settings → Enable Custom SMTP**
+   - Sender name `Accounta-Bull`, sender email on your verified domain
+   - Host `smtp.resend.com`, Port `465`, Username `resend`, Password = your
+     Resend API key
+   Until custom SMTP is set, the sender stays "Supabase Auth" no matter what the
+   templates say.
+
 ### Boost emails (optional, later)
 
 The cron email step lives in `supabase/functions/send-boost-emails/` with its own
