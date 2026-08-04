@@ -650,11 +650,111 @@ select {
 
 .empty {
   text-align: center;
-  padding: 40px 20px;
+  padding: 30px 16px;
   color: var(--text-dim);
 }
 .empty .empty-emoji {
-  font-size: 40px;
+  font-size: 44px;
+  margin-bottom: 8px;
+}
+
+/* ---------- Today: summary / welcome ---------- */
+.today-summary {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.welcome {
+  text-align: center;
+  padding: 6px 2px 10px;
+}
+.welcome-emoji {
+  font-size: 52px;
+  filter: drop-shadow(0 8px 20px rgba(245, 130, 31, 0.35));
+}
+.welcome-title {
+  font-size: 23px;
+  margin: 10px 0 6px;
+}
+.welcome-sub {
+  color: var(--text-dim);
+  font-size: 15px;
+  margin: 0 auto 20px;
+  max-width: 340px;
+  line-height: 1.45;
+}
+.steps-heading {
+  margin: 26px 0 12px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--gold);
+  letter-spacing: 0.5px;
+}
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  text-align: left;
+  margin-bottom: 8px;
+}
+.step {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  background: linear-gradient(180deg, var(--card-2) 0%, var(--card) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 15px 16px;
+}
+.step-num {
+  flex: 0 0 auto;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: #14100a;
+  background: linear-gradient(180deg, #ff9a3d, var(--orange));
+  box-shadow: 0 6px 14px rgba(245, 130, 31, 0.35);
+}
+.step-title {
+  font-weight: 700;
+  font-size: 16px;
+  margin-bottom: 3px;
+}
+.step-body {
+  color: var(--text-dim);
+  font-size: 13.5px;
+  line-height: 1.45;
+}
+
+/* ---------- Bigger buttons ---------- */
+.btn-lg {
+  padding: 17px 22px;
+  font-size: 17px;
+  border-radius: 16px;
+}
+.goal-actions .btn {
+  width: auto;
+  padding: 13px 16px;
+  font-size: 15px;
+}
+.goal-actions .btn-primary {
+  flex: 1;
+}
+.btn-icon {
+  flex: 0 0 auto;
+  width: 50px;
+  padding: 0 !important;
+  font-size: 19px;
+}
+.goal-done {
+  opacity: 0.72;
 }
 .link-btn {
   background: none;
