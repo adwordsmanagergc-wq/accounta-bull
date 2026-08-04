@@ -23,7 +23,7 @@ export default function Landing() {
   return (
     <div className="app-shell landing">
       <div className="landing-logo">
-        <Logo size={140} glow />
+        <Logo size={196} glow />
       </div>
       <div className="wordmark-card">
         <img

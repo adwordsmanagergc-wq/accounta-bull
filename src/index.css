@@ -349,8 +349,8 @@ select {
 .landing-logo::before {
   content: '';
   position: absolute;
-  width: 230px;
-  height: 230px;
+  width: 320px;
+  height: 320px;
   border-radius: 50%;
   background: radial-gradient(
     circle,
