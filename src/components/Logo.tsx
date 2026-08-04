@@ -1,22 +1,21 @@
 import { useState } from 'react'
 
-const webp = `${import.meta.env.BASE_URL}logo.webp`
-const svg = `${import.meta.env.BASE_URL}logo.svg`
+// Drop your transparent logo at public/accountabulllogo.webp and it's used
+// automatically. Until then it falls back to the placeholder logo.svg.
+const primary = `${import.meta.env.BASE_URL}accountabulllogo.webp`
+const fallback = `${import.meta.env.BASE_URL}logo.svg`
 
-/**
- * Shows your brand logo. Drop a real `logo.webp` into /public and it will be
- * used automatically; until then it falls back to the placeholder logo.svg.
- */
-export default function Logo({ size = 200 }: { size?: number }) {
-  const [src, setSrc] = useState(webp)
+export default function Logo({ size = 200, glow = false }: { size?: number; glow?: boolean }) {
+  const [src, setSrc] = useState(primary)
   return (
     <img
       src={src}
-      onError={() => src !== svg && setSrc(svg)}
+      onError={() => src !== fallback && setSrc(fallback)}
       width={size}
       height={size}
       alt="Accounta-Bull"
-      style={{ width: size, height: 'auto', borderRadius: 20, display: 'block' }}
+      className={glow ? 'logo-glow' : undefined}
+      style={{ width: size, height: 'auto', display: 'block' }}
     />
   )
 }

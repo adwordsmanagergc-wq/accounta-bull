@@ -27,8 +27,10 @@ The app still loads without Supabase keys — but sign-up/login only work once
 
 ### Your logo
 
-Drop your real **`logo.webp`** into the `public/` folder. It's used
-automatically; until then a placeholder (`public/logo.svg`) shows.
+Drop your transparent **`accountabulllogo.webp`** into the `public/` folder. It's
+used automatically and floats on the navy background with a soft brand glow;
+until then a placeholder (`public/logo.svg`) shows. Use a logo with a
+**transparent background** (not white) so it sits cleanly on the dark page.
 
 ---
 

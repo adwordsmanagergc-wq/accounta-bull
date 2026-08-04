@@ -22,8 +22,8 @@ const features = [
 export default function Landing() {
   return (
     <div className="app-shell landing">
-      <div className="landing-logo card">
-        <Logo size={220} />
+      <div className="landing-logo">
+        <Logo size={240} glow />
       </div>
 
       <p className="landing-tagline">
