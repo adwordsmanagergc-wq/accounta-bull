@@ -658,7 +658,13 @@ select {
   margin-bottom: 8px;
 }
 
-/* ---------- Today: summary / welcome ---------- */
+/* ---------- Today: date / summary / welcome ---------- */
+.today-date {
+  color: var(--gold);
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 2px;
+}
 .today-summary {
   text-align: center;
   color: var(--text-dim);

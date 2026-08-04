@@ -41,12 +41,23 @@ export default function Today() {
     if (!user) return
     setError(null)
     try {
-      const [g, c] = await Promise.all([fetchGoals(user.id), fetchTodayCompletions(user.id)])
+      // Goals are the critical fetch. Completions are non-critical — if that
+      // query fails we still show the day (as if nothing is done yet).
+      const g = await fetchGoals(user.id)
       setGoals(g)
-      setCompletions(c)
+      try {
+        setCompletions(await fetchTodayCompletions(user.id))
+      } catch (e) {
+        console.warn('completions load failed', e)
+        setCompletions({})
+      }
     } catch (e) {
       console.error(e)
-      setError('We couldn’t load your goals. Check your connection and try again.')
+      setError(
+        'We couldn’t load your goals. If this is your first time, make sure the ' +
+          'database setup (the SQL migrations) has been run in Supabase. Otherwise, ' +
+          'check your connection and try again.'
+      )
     } finally {
       setLoaded(true)
     }
@@ -102,15 +113,18 @@ export default function Today() {
   const catOf = (g: Goal) => CATEGORIES.find((c) => c.value === g.category)
   const firstName = profile?.name?.trim().split(' ')[0]
   const isNewMember = goals.length === 0
+  const todayDate = new Date().toLocaleDateString(undefined, {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+  })
 
   return (
     <div className="page-pad">
       <div className="page-head">
         <div>
           <h1>Today</h1>
-          <div className="muted" style={{ fontSize: 14 }}>
-            {firstName ? `Let’s charge, ${firstName}.` : 'Let’s charge.'}
-          </div>
+          <div className="today-date">{todayDate}</div>
         </div>
         <div className="pill">🏆 {profile?.horns ?? 0}</div>
       </div>
