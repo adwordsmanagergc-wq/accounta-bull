@@ -332,20 +332,25 @@ select {
 
 /* ---------- Landing ---------- */
 .landing {
-  padding-top: 26px;
+  padding-top: 14px;
+  padding-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100dvh;
 }
 .landing-logo {
   display: grid;
   place-items: center;
-  padding: 18px 22px 6px;
+  padding: 4px 22px 2px;
   position: relative;
 }
 /* Soft brand glow so the transparent logo sits richly on the navy. */
 .landing-logo::before {
   content: '';
   position: absolute;
-  width: 320px;
-  height: 320px;
+  width: 230px;
+  height: 230px;
   border-radius: 50%;
   background: radial-gradient(
     circle,
@@ -367,50 +372,62 @@ select {
 }
 /* White card behind the wordmark so its navy text stays crisp on navy. */
 .wordmark-card {
-  margin: 6px auto 0;
+  margin: 2px auto 0;
   width: fit-content;
   max-width: 92%;
   background: #ffffff;
-  border-radius: 16px;
-  padding: 10px 20px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(201, 169, 106, 0.25);
+  border-radius: 13px;
+  padding: 7px 16px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(201, 169, 106, 0.25);
 }
 .wordmark-img {
   display: block;
   width: 100%;
-  max-width: 300px;
+  max-width: 210px;
   height: auto;
 }
 .landing-tagline {
-  margin: 22px 4px 0;
+  margin: 12px 6px 0;
   text-align: center;
-  font-size: 19px;
-  line-height: 1.5;
+  font-size: 14.5px;
+  line-height: 1.4;
   color: #e7edf7;
+}
+.landing-features {
+  margin-top: 12px;
+}
+.landing-features.stack > * + * {
+  margin-top: 8px;
+}
+.landing-cta {
+  margin-top: 16px;
+}
+.landing-cta .btn-primary {
+  padding: 13px 20px;
 }
 .feature-card {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  padding: 16px 18px;
+  gap: 12px;
+  padding: 11px 14px;
   border-radius: var(--radius);
   background: rgba(20, 42, 77, 0.55);
   border: 1px solid var(--border);
 }
 .feature-icon {
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1.2;
 }
 .feature-title {
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: 14.5px;
   color: var(--text);
 }
 .feature-body {
   color: var(--text-dim);
-  font-size: 14.5px;
-  margin-top: 3px;
-  line-height: 1.45;
+  font-size: 12.5px;
+  margin-top: 2px;
+  line-height: 1.35;
 }
 
 /* ---------- Auth pages ---------- */

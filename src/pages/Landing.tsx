@@ -23,7 +23,7 @@ export default function Landing() {
   return (
     <div className="app-shell landing">
       <div className="landing-logo">
-        <Logo size={230} glow />
+        <Logo size={140} glow />
       </div>
       <div className="wordmark-card">
         <img
@@ -38,7 +38,7 @@ export default function Landing() {
         you honest, and every win earns you horns.
       </p>
 
-      <div className="stack" style={{ marginTop: 22 }}>
+      <div className="stack landing-features">
         {features.map((f) => (
           <div className="feature-card" key={f.title}>
             <span className="feature-icon">{f.icon}</span>
@@ -50,11 +50,11 @@ export default function Landing() {
         ))}
       </div>
 
-      <div style={{ marginTop: 26 }}>
+      <div className="landing-cta">
         <Link to="/signup" className="btn btn-primary">
           JOIN THE HERD
         </Link>
-        <p className="center muted" style={{ marginTop: 16 }}>
+        <p className="center muted" style={{ marginTop: 12 }}>
           Already in the herd? <Link to="/login">Log in</Link>
         </p>
       </div>
