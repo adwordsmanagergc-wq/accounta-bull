@@ -61,8 +61,7 @@ To swap in a new logo later, replace those two files (same names). If
    the hash routes and the magic-link `?code=` callback) so magic links /
    confirmations come back to the app:
    - `http://localhost:5173/**` (local dev)
-   - `https://YOUR-APP.vercel.app/**` (Vercel — the production domain)
-   - On GitHub Pages instead, use `https://YOU.github.io/accountabull-web/**`
+   - `https://accounta-bull.com/**` and `https://www.accounta-bull.com/**` (production)
 5. (Optional, for testing without email confirmation) **Authentication →
    Providers → Email** → you can turn *Confirm email* off while developing.
 
@@ -103,8 +102,14 @@ Vercel auto-detects Vite — **no base-path config needed** (the default is `/`)
    Framework preset **Vite**, build `npm run build`, output `dist` (auto-filled).
 3. **Environment Variables** → add `VITE_SUPABASE_URL` and
    `VITE_SUPABASE_ANON_KEY`, then Deploy.
-4. In **Supabase → Authentication → URL Configuration**, add your Vercel URL
-   (e.g. `https://your-app.vercel.app/`) to **Redirect URLs** so login works.
+4. **Custom domain:** the app is served at **https://accounta-bull.com**
+   (Vercel → **Domains**). The code reads its own URL at runtime, so no code
+   change is needed for the domain — but you MUST update Supabase auth URLs:
+   in **Supabase → Authentication → URL Configuration** set the **Site URL** to
+   `https://accounta-bull.com` and add these **Redirect URLs**:
+   - `https://accounta-bull.com/**`
+   - `https://www.accounta-bull.com/**`
+   - `http://localhost:5173/**` (local dev)
 
 > **White screen on Vercel?** That means the build used a GitHub Pages sub-path.
 > Make sure `VITE_BASE` is **not** set in your Vercel project env vars — Vercel
