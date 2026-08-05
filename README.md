@@ -9,8 +9,10 @@ Pages**.
 - Display font **Archivo Black**, body font **Space Grotesk**
 - Mobile-first — it's meant to live on a phone
 
-> **Herds** and the **rewards catalog** are intentionally left out of this
-> version. `age_band` and `focus_areas` stay in the schema for later.
+> **Herds** are in: invite a friend by code, then set **shared challenges**
+> with a reward/forfeit and a friendly-competition scoreboard (Herd tab). The
+> global **rewards catalog** is still out; `age_band` and `focus_areas` stay in
+> the schema for later.
 
 ---
 
@@ -46,6 +48,8 @@ To swap in a new logo later, replace those two files (same names). If
 2. **SQL editor → New query** → paste and run, in order:
    - `supabase/migrations/0001_schema.sql` (tables, RLS, auto-profile trigger)
    - `supabase/migrations/0002_seed_boosts.sql` (30 boost messages)
+   - `supabase/migrations/0003_herd.sql` (herds: invite a friend + shared
+     challenges with rewards/forfeits and a scoreboard)
 3. **Project Settings → API** → copy the **Project URL** and **anon public key**
    into `.env`:
    ```

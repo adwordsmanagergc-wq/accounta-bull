@@ -1,0 +1,437 @@
+import { useCallback, useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { useToast } from '../context/ToastContext'
+import { appUrl } from '../lib/supabase'
+import {
+  acceptInvite,
+  checkinToday,
+  createChallenge,
+  createInvite,
+  deleteChallenge,
+  fetchChallenges,
+  fetchCheckins,
+  fetchPartners,
+} from '../lib/herd'
+import type { ChallengeCheckin, HerdPartner, SharedChallenge } from '../lib/types'
+
+export default function Herd() {
+  const { user, profile } = useAuth()
+  const { showToast } = useToast()
+  const [params, setParams] = useSearchParams()
+
+  const [partners, setPartners] = useState<HerdPartner[]>([])
+  const [challenges, setChallenges] = useState<SharedChallenge[]>([])
+  const [checkins, setCheckins] = useState<ChallengeCheckin[]>([])
+  const [loaded, setLoaded] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  const [inviteCode, setInviteCode] = useState<string | null>(null)
+  const [joinCode, setJoinCode] = useState(params.get('invite') ?? '')
+  const [busy, setBusy] = useState(false)
+
+  const myName = profile?.name?.trim().split(' ')[0] || 'You'
+
+  const load = useCallback(async () => {
+    if (!user) return
+    setError(null)
+    try {
+      const ps = await fetchPartners(user.id)
+      setPartners(ps)
+      if (ps.length) {
+        const allChallenges = (
+          await Promise.all(ps.map((p) => fetchChallenges(p.connectionId)))
+        ).flat()
+        setChallenges(allChallenges)
+        setCheckins(await fetchCheckins(allChallenges.map((c) => c.id)))
+      } else {
+        setChallenges([])
+        setCheckins([])
+      }
+    } catch (e) {
+      console.error(e)
+      setError(
+        'We couldn’t load your herd. If this is new, make sure the herd database ' +
+          'setup (migration 0003_herd.sql) has been run in Supabase.'
+      )
+    } finally {
+      setLoaded(true)
+    }
+  }, [user])
+
+  useEffect(() => {
+    load()
+  }, [load])
+
+  async function onCreateInvite() {
+    if (!user || busy) return
+    setBusy(true)
+    try {
+      setInviteCode(await createInvite(user.id))
+    } catch (e) {
+      showToast('Could not create invite — try again.', '⚠️')
+      console.error(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onJoin() {
+    if (!user || busy || !joinCode.trim()) return
+    setBusy(true)
+    try {
+      await acceptInvite(joinCode)
+      showToast('You’re in the herd! 🐂', '🤝')
+      setJoinCode('')
+      params.delete('invite')
+      setParams(params, { replace: true })
+      await load()
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Could not join with that code.'
+      showToast(msg, '⚠️')
+      console.error(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function shareInvite(code: string) {
+    const link = `${appUrl}#/herd?invite=${code}`
+    const text = `Join my herd on Accounta-Bull! Use code ${code} or this link: ${link}`
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Join my herd', text })
+      } else {
+        await navigator.clipboard.writeText(text)
+        showToast('Invite copied to clipboard 📋', '📋')
+      }
+    } catch {
+      /* user dismissed share sheet */
+    }
+  }
+
+  if (!loaded) return <div className="page-pad" />
+
+  return (
+    <div className="page-pad">
+      <div className="page-head">
+        <h1>Your Herd</h1>
+      </div>
+
+      {error && (
+        <div className="card" style={{ marginBottom: 16 }}>
+          <p style={{ margin: '0 0 12px' }}>⚠️ {error}</p>
+          <button className="btn btn-ghost" onClick={load}>
+            Try again
+          </button>
+        </div>
+      )}
+
+      {!error && partners.length === 0 && (
+        <div className="herd-intro">
+          <div className="welcome-emoji">🤝</div>
+          <h2 className="welcome-title">Chase goals together</h2>
+          <p className="welcome-sub">
+            Invite a friend to your herd, set shared challenges, and put a reward or forfeit on the
+            line. Friendly competition keeps you both honest.
+          </p>
+        </div>
+      )}
+
+      {/* Invite / join always available so you can grow your herd */}
+      {!error && (
+        <div className="card stack" style={{ marginBottom: 16 }}>
+          <div>
+            <div className="section-label">Invite a friend</div>
+            {inviteCode ? (
+              <>
+                <div className="invite-code">{inviteCode}</div>
+                <button className="btn btn-primary" onClick={() => shareInvite(inviteCode)}>
+                  📤 Share invite
+                </button>
+                <p className="faint" style={{ fontSize: 12, marginTop: 8 }}>
+                  They enter this code below (or open your link) while signed in.
+                </p>
+              </>
+            ) : (
+              <button className="btn btn-primary" disabled={busy} onClick={onCreateInvite}>
+                ➕ Create invite code
+              </button>
+            )}
+          </div>
+
+          <div className="divider">or</div>
+
+          <div>
+            <div className="section-label">Have a code?</div>
+            <div className="join-row">
+              <input
+                className="input"
+                placeholder="Enter invite code"
+                value={joinCode}
+                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                autoCapitalize="characters"
+              />
+              <button className="btn btn-primary btn-join" disabled={busy || !joinCode.trim()} onClick={onJoin}>
+                Join
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Each partner + their shared challenges */}
+      {partners.map((partner) => (
+        <PartnerBlock
+          key={partner.connectionId}
+          partner={partner}
+          me={{ id: user!.id, name: myName, horns: profile?.horns ?? 0, streak: profile?.streak ?? 0 }}
+          challenges={challenges.filter((c) => c.connection_id === partner.connectionId)}
+          checkins={checkins}
+          onChanged={load}
+        />
+      ))}
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+
+function PartnerBlock({
+  partner,
+  me,
+  challenges,
+  checkins,
+  onChanged,
+}: {
+  partner: HerdPartner
+  me: { id: string; name: string; horns: number; streak: number }
+  challenges: SharedChallenge[]
+  checkins: ChallengeCheckin[]
+  onChanged: () => void | Promise<void>
+}) {
+  const { showToast } = useToast()
+  const [showForm, setShowForm] = useState(false)
+  const [title, setTitle] = useState('')
+  const [reward, setReward] = useState('')
+  const [forfeit, setForfeit] = useState('')
+  const [days, setDays] = useState(7)
+  const [busy, setBusy] = useState(false)
+
+  const partnerName = partner.name?.trim().split(' ')[0] || 'Partner'
+
+  async function submit() {
+    if (busy || !title.trim()) return
+    setBusy(true)
+    try {
+      await createChallenge(me.id, partner.connectionId, { title: title.trim(), reward, forfeit, days })
+      setTitle('')
+      setReward('')
+      setForfeit('')
+      setDays(7)
+      setShowForm(false)
+      showToast('Challenge set! May the best charge win 🐂', '🏁')
+      await onChanged()
+    } catch (e) {
+      showToast('Could not create the challenge.', '⚠️')
+      console.error(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div style={{ marginBottom: 18 }}>
+      <div className="partner-head">
+        <div className="partner-avatar">🐂</div>
+        <div style={{ flex: 1 }}>
+          <div className="partner-name">{partnerName}</div>
+          <div className="faint" style={{ fontSize: 13 }}>
+            🏆 {partner.horns} horns · {partner.streak}🔥 streak
+          </div>
+        </div>
+      </div>
+
+      <div className="stack">
+        {challenges.length === 0 && (
+          <p className="faint" style={{ fontSize: 14, margin: '2px 2px 4px' }}>
+            No shared challenges yet — set one below.
+          </p>
+        )}
+        {challenges.map((ch) => (
+          <ChallengeCard
+            key={ch.id}
+            challenge={ch}
+            checkins={checkins.filter((c) => c.challenge_id === ch.id)}
+            me={me}
+            partner={partner}
+            onChanged={onChanged}
+          />
+        ))}
+
+        {showForm ? (
+          <div className="card stack">
+            <div className="field">
+              <label>Challenge</label>
+              <input
+                className="input"
+                placeholder="e.g. Run every morning this week"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label>🏆 Reward for the winner</label>
+              <input
+                className="input"
+                placeholder="e.g. Loser buys dinner"
+                value={reward}
+                onChange={(e) => setReward(e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label>😅 Forfeit for the loser</label>
+              <input
+                className="input"
+                placeholder="e.g. Post an embarrassing selfie"
+                value={forfeit}
+                onChange={(e) => setForfeit(e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label>Runs for</label>
+              <select className="select" value={days} onChange={(e) => setDays(Number(e.target.value))}>
+                <option value={3}>3 days</option>
+                <option value={7}>1 week</option>
+                <option value={14}>2 weeks</option>
+                <option value={30}>1 month</option>
+              </select>
+            </div>
+            <div className="row" style={{ gap: 8 }}>
+              <button className="btn btn-primary" disabled={busy} onClick={submit}>
+                {busy ? 'Setting…' : 'Set challenge'}
+              </button>
+              <button className="btn btn-ghost" onClick={() => setShowForm(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button className="btn btn-ghost" onClick={() => setShowForm(true)}>
+            🏁 New shared challenge
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+
+function ChallengeCard({
+  challenge,
+  checkins,
+  me,
+  partner,
+  onChanged,
+}: {
+  challenge: SharedChallenge
+  checkins: ChallengeCheckin[]
+  me: { id: string; name: string }
+  partner: HerdPartner
+  onChanged: () => void | Promise<void>
+}) {
+  const { showToast } = useToast()
+  const [busy, setBusy] = useState(false)
+
+  const myScore = checkins.filter((c) => c.user_id === me.id).length
+  const partnerScore = checkins.filter((c) => c.user_id === partner.userId).length
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const checkedInToday = checkins.some((c) => c.user_id === me.id && c.checked_on === todayStr)
+  const ended = todayStr > challenge.ends_on
+  const leader = myScore === partnerScore ? 'tie' : myScore > partnerScore ? 'me' : 'partner'
+  const partnerName = partner.name?.trim().split(' ')[0] || 'Partner'
+
+  async function check() {
+    if (busy || checkedInToday) return
+    setBusy(true)
+    try {
+      await checkinToday(me.id, challenge.id)
+      showToast('Checked in! Keep charging 🐂', '✅')
+      await onChanged()
+    } catch (e) {
+      showToast('Could not check in — try again.', '⚠️')
+      console.error(e)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function remove() {
+    if (!confirm('Delete this challenge for both of you?')) return
+    try {
+      await deleteChallenge(challenge.id)
+      await onChanged()
+    } catch (e) {
+      showToast('Could not delete the challenge.', '⚠️')
+      console.error(e)
+    }
+  }
+
+  return (
+    <div className="card challenge-card">
+      <div className="goal-top">
+        <div className="goal-title">{challenge.title}</div>
+        <button className="link-btn" style={{ fontSize: 13 }} onClick={remove}>
+          Delete
+        </button>
+      </div>
+
+      <div className="scoreboard">
+        <div className={`score ${leader === 'me' ? 'lead' : ''}`}>
+          <div className="score-num">{myScore}</div>
+          <div className="score-name">{me.name}</div>
+        </div>
+        <div className="score-vs">vs</div>
+        <div className={`score ${leader === 'partner' ? 'lead' : ''}`}>
+          <div className="score-num">{partnerScore}</div>
+          <div className="score-name">{partnerName}</div>
+        </div>
+      </div>
+
+      {(challenge.reward || challenge.forfeit) && (
+        <div className="stakes">
+          {challenge.reward && (
+            <div>
+              🏆 <strong>Reward:</strong> {challenge.reward}
+            </div>
+          )}
+          {challenge.forfeit && (
+            <div>
+              😅 <strong>Forfeit:</strong> {challenge.forfeit}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div className="faint" style={{ fontSize: 12, marginTop: 8 }}>
+        {ended
+          ? leader === 'tie'
+            ? 'Finished — it’s a tie! 🤝'
+            : `Finished — ${leader === 'me' ? me.name : partnerName} won! 🎉`
+          : `Ends ${challenge.ends_on}`}
+      </div>
+
+      {!ended && (
+        <button
+          className="btn btn-primary"
+          style={{ marginTop: 12 }}
+          disabled={busy || checkedInToday}
+          onClick={check}
+        >
+          {checkedInToday ? '✓ Checked in today' : '✓ I did it today'}
+        </button>
+      )}
+    </div>
+  )
+}

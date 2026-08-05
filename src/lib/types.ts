@@ -47,3 +47,39 @@ export interface BoostMessage {
   category: Category | 'general'
   text: string
 }
+
+export interface HerdConnection {
+  id: string
+  user_low: string
+  user_high: string
+  created_at: string
+}
+
+export interface HerdPartner {
+  connectionId: string
+  userId: string
+  name: string | null
+  horns: number
+  streak: number
+}
+
+export interface SharedChallenge {
+  id: string
+  connection_id: string
+  created_by: string
+  title: string
+  reward: string | null
+  forfeit: string | null
+  starts_on: string
+  ends_on: string
+  active: boolean
+  created_at: string
+}
+
+export interface ChallengeCheckin {
+  id: string
+  challenge_id: string
+  user_id: string
+  checked_on: string
+  created_at: string
+}

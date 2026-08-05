@@ -9,6 +9,7 @@ import Today from './pages/Today'
 import GoalEdit from './pages/GoalEdit'
 import Boost from './pages/Boost'
 import Profile from './pages/Profile'
+import Herd from './pages/Herd'
 
 function Loading() {
   return (
@@ -33,6 +34,7 @@ function AppLayout() {
         <Route path="/goal" element={<GoalEdit />} />
         <Route path="/goal/:id" element={<GoalEditWithKey />} />
         <Route path="/boost/:id" element={<Boost />} />
+        <Route path="/herd" element={<Herd />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<Navigate to="/today" replace />} />
       </Routes>

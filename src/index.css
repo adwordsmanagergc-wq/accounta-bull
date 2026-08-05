@@ -776,3 +776,112 @@ select {
   margin-bottom: 14px;
   display: inline-block;
 }
+
+/* ---------- Herd ---------- */
+.herd-intro {
+  text-align: center;
+  padding: 8px 4px 18px;
+}
+.section-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.invite-code {
+  font-family: var(--font-display);
+  font-size: 30px;
+  letter-spacing: 5px;
+  text-align: center;
+  color: var(--gold);
+  background: rgba(10, 22, 40, 0.6);
+  border: 1px dashed var(--border-strong);
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 12px;
+  user-select: all;
+}
+.join-row {
+  display: flex;
+  gap: 8px;
+}
+.join-row .input {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.btn-join {
+  width: auto;
+  flex: 0 0 auto;
+  padding: 13px 20px;
+}
+.partner-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 2px 12px;
+}
+.partner-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+  background: linear-gradient(180deg, var(--card-2), var(--card));
+  border: 1px solid var(--border-strong);
+}
+.partner-name {
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+.challenge-card {
+  padding: 16px;
+}
+.scoreboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin: 14px 0 4px;
+}
+.score {
+  flex: 1;
+  text-align: center;
+  padding: 12px 8px;
+  border-radius: 14px;
+  background: rgba(10, 22, 40, 0.5);
+  border: 1px solid var(--border);
+}
+.score.lead {
+  border-color: var(--orange);
+  background: rgba(245, 130, 31, 0.12);
+}
+.score-num {
+  font-family: var(--font-display);
+  font-size: 30px;
+  color: var(--text);
+}
+.score.lead .score-num {
+  color: var(--orange);
+}
+.score-name {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.score-vs {
+  font-family: var(--font-display);
+  color: var(--text-faint);
+  font-size: 14px;
+}
+.stakes {
+  margin-top: 12px;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stakes strong {
+  color: var(--text);
+}
