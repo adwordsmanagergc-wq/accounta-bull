@@ -21,7 +21,7 @@ Pages**.
 ```bash
 npm install
 cp .env.example .env      # then paste your Supabase URL + anon key into .env
-npm run dev               # open the URL it prints (http://localhost:5173/accountabull-web/)
+npm run dev               # open the URL it prints (http://localhost:5173/)
 ```
 
 The app still loads without Supabase keys — but sign-up/login only work once
@@ -56,10 +56,13 @@ To swap in a new logo later, replace those two files (same names). If
    VITE_SUPABASE_URL=https://xxxx.supabase.co
    VITE_SUPABASE_ANON_KEY=eyJ....
    ```
-4. **Authentication → URL Configuration** → add your site URLs to
-   **Redirect URLs** so magic links / confirmations come back to the app:
-   - `http://localhost:5173/accountabull-web/`
-   - `https://YOUR-GITHUB-USERNAME.github.io/accountabull-web/`
+4. **Authentication → URL Configuration** → set the **Site URL** to your
+   deployed app, and add these to **Redirect URLs** (the `/**` wildcard covers
+   the hash routes and the magic-link `?code=` callback) so magic links /
+   confirmations come back to the app:
+   - `http://localhost:5173/**` (local dev)
+   - `https://YOUR-APP.vercel.app/**` (Vercel — the production domain)
+   - On GitHub Pages instead, use `https://YOU.github.io/accountabull-web/**`
 5. (Optional, for testing without email confirmation) **Authentication →
    Providers → Email** → you can turn *Confirm email* off while developing.
 
