@@ -8,6 +8,7 @@ import {
 } from 'react'
 import type { Session, User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
+import { ensurePushSubscribed, syncTimezone } from '../lib/push'
 import type { Profile } from '../lib/types'
 
 interface AuthCtx {
@@ -30,7 +31,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loadProfile(userId: string) {
     const { data } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
-    setProfile((data as Profile) ?? null)
+    const p = (data as Profile) ?? null
+    setProfile(p)
+    // Best-effort: keep timezone current and refresh the push subscription
+    // (only actually subscribes if the user already granted permission).
+    void syncTimezone(userId, p?.timezone)
+    void ensurePushSubscribed(userId)
   }
 
   async function refreshProfile() {

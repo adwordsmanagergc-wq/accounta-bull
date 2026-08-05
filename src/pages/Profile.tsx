@@ -2,24 +2,34 @@ import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import Logo from '../components/Logo'
-import {
-  notificationPermission,
-  notificationsSupported,
-  requestNotificationPermission,
-} from '../lib/notify'
+import { notificationPermission, notificationsSupported } from '../lib/notify'
+import { enablePush, pushConfigured, pushSupported } from '../lib/push'
 
 export default function Profile() {
   const { user, profile, signOut } = useAuth()
   const { showToast } = useToast()
   const [perm, setPerm] = useState(notificationPermission())
+  const [busy, setBusy] = useState(false)
 
   async function enableNotifications() {
-    const result = await requestNotificationPermission()
-    setPerm(result)
-    if (result === 'granted') showToast('Charge-call notifications on 🔔', '⚡')
+    if (!user) return
+    setBusy(true)
+    // Subscribes to Web Push (works even when the app is closed) if configured;
+    // otherwise falls back to in-app notifications while the tab is open.
+    const result = await enablePush(user.id)
+    setPerm(notificationPermission())
+    setBusy(false)
+    if (result === 'ok') showToast('Charge-call push on 🔔 — even when the app is closed', '⚡')
     else if (result === 'denied')
       showToast('Notifications blocked — enable them in your browser settings.', '🔕')
+    else if (result === 'unsupported')
+      showToast('This browser can’t do push. On iPhone, add the app to your Home Screen first.', 'ℹ️')
+    else if (result === 'unconfigured')
+      showToast('Push key not set yet — notifications work while the app is open.', 'ℹ️')
+    else showToast('Could not enable push — try again.', '⚠️')
   }
+
+  const pushReady = pushConfigured && pushSupported()
 
   return (
     <div className="page-pad">
@@ -57,15 +67,17 @@ export default function Profile() {
               <div style={{ fontWeight: 700 }}>Charge-call notifications</div>
               <div className="muted" style={{ fontSize: 13 }}>
                 {perm === 'granted'
-                  ? 'On — you’ll get a nudge 30 min before each goal.'
+                  ? pushReady
+                    ? 'On — pushed 30 min before each goal, even when the app is closed.'
+                    : 'On — you’ll get a nudge 30 min before each goal while the app is open.'
                   : perm === 'denied'
                     ? 'Blocked in your browser settings.'
                     : 'Get a nudge 30 min before each goal.'}
               </div>
             </div>
             {perm !== 'granted' && (
-              <button className="btn btn-ghost btn-sm" onClick={enableNotifications}>
-                Enable
+              <button className="btn btn-ghost btn-sm" disabled={busy} onClick={enableNotifications}>
+                {busy ? '…' : 'Enable'}
               </button>
             )}
           </div>

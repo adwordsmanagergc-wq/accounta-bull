@@ -19,6 +19,7 @@ export interface Profile {
   focus_areas: string[] | null
   horns: number
   streak: number
+  timezone: string | null
   created_at: string
 }
 

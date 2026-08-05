@@ -50,6 +50,8 @@ To swap in a new logo later, replace those two files (same names). If
    - `supabase/migrations/0002_seed_boosts.sql` (30 boost messages)
    - `supabase/migrations/0003_herd.sql` (herds: invite a friend + shared
      challenges with rewards/forfeits and a scoreboard)
+   - `supabase/migrations/0004_push.sql` (Web Push subscriptions + timezone,
+     for background charge-call notifications)
 3. **Project Settings → API** → copy the **Project URL** and **anon public key**
    into `.env`:
    ```
@@ -85,6 +87,22 @@ Signup/login emails have two brandable parts:
      Resend API key
    Until custom SMTP is set, the sender stays "Supabase Auth" no matter what the
    templates say.
+
+### Background push notifications (Web Push)
+
+The app is an installable PWA (service worker `public/sw.js`) and can send a real
+"Charge Call" push ~30 min before each goal — **even when the app is closed** —
+on desktop/Android, and on iPhone once added to the Home Screen (iOS 16.4+).
+
+Setup (full details in `supabase/functions/send-push/README.md`):
+1. `npx web-push generate-vapid-keys`
+2. Put the **public** key in `VITE_VAPID_PUBLIC_KEY` (`.env` and Vercel env vars).
+3. Run migration `0004_push.sql`.
+4. Set the **private** key as a Supabase function secret and deploy + schedule
+   the `send-push` Edge Function (cron every 5 min).
+
+Users turn it on via **Profile → Enable**. Without the VAPID key set, the app
+still shows in-app notifications while the tab is open.
 
 ### Boost emails (optional, later)
 
