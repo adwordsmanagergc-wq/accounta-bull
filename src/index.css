@@ -430,6 +430,7 @@ select {
   border-radius: var(--radius);
   background: rgba(20, 42, 77, 0.55);
   border: 1px solid var(--border);
+  min-height: 78px;
 }
 .feature-icon {
   font-size: 20px;
@@ -440,6 +441,7 @@ select {
   position: relative;
   overflow: hidden;
   border-color: var(--border-strong);
+  align-items: center;
 }
 .feature-card.has-video > .feature-icon,
 .feature-card.has-video > div {
