@@ -77,9 +77,9 @@ function systemFor(tone: Tone): string {
     'a user starts one of their goals, to give them a psychological push to begin.',
     '',
     'Voice: second person ("you"). One or two short sentences, ideally under 120',
-    'characters. Make it personal: when a first name is given, address them BY NAME',
-    'in most of the lines (open or close with it, naturally, not jammed in), and',
-    'where it fits, nod to one of their actual goals or their streak. If no name is',
+    'characters. Make it personal: tie EACH line to one of their actual goals (name',
+    'the goal or the activity), so it never feels generic. Use their first name in',
+    'SOME lines, not every one, and only when it reads naturally. If no name is',
     'given, do not invent one. Bull and "charge" imagery is welcome but do not overuse it.',
     '',
     TONE_GUIDE[tone],
@@ -114,8 +114,9 @@ async function generateForUser(
     goalList,
     '',
     `Write ${count} distinct charge-call lines tailored to this person.`,
+    `Each line must clearly relate to one of their goals above (reference the goal or activity).`,
     name
-      ? `Use their first name (${name}) in most of the lines so it feels personal.`
+      ? `Use their first name (${name}) in only some of the lines, where it feels natural, not every line.`
       : `No name was given, so do not use or invent one.`,
     `Tag each line with the single most relevant category from: ${allowed.join(', ')}.`,
     'Use "general" for lines that fit any goal.',
