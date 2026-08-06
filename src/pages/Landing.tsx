@@ -59,7 +59,7 @@ export default function Landing() {
                 <span className="feature-video-scrim" />
               </>
             )}
-            {f.icon && <span className="feature-icon">{f.icon}</span>}
+            <span className="feature-icon">{f.icon}</span>
             <div>
               <div className="feature-title">{f.title}</div>
               {f.body && <div className="feature-body">{f.body}</div>}

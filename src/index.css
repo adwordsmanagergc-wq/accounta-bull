@@ -435,13 +435,16 @@ select {
 .feature-icon {
   font-size: 20px;
   line-height: 1.2;
+  flex: 0 0 auto;
+  width: 24px;
+  text-align: center;
 }
-/* Charge Calls card with a looping muted video background */
+/* Positive Pushes card with a looping muted video background. Keep the same
+   top-aligned layout as the other cards so its title lines up with theirs. */
 .feature-card.has-video {
   position: relative;
   overflow: hidden;
   border-color: var(--border-strong);
-  align-items: center;
 }
 .feature-card.has-video > .feature-icon,
 .feature-card.has-video > div {
