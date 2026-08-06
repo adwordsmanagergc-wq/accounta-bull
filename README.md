@@ -54,6 +54,9 @@ To swap in a new logo later, replace those two files (same names). If
      for background charge-call notifications)
    - `supabase/migrations/0005_photos_herd.sql` (profile pictures + progress
      photos via Storage buckets; herd name/photo/rules; challenge rules)
+   - `supabase/migrations/0006_measurements.sql` (weight log)
+   - `supabase/migrations/0007_rewards_cheers_sharing.sql` (rewards catalog +
+     redeem RPC, herd cheers, progress-photo sharing)
 3. **Project Settings → API** → copy the **Project URL** and **anon public key**
    into `.env`:
    ```
