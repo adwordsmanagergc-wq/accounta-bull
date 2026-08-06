@@ -347,7 +347,7 @@ select {
   position: absolute;
   inset: 0;
   background: url('/landing-bg.webp') center top / cover no-repeat;
-  opacity: 0.1;
+  opacity: 0.2;
   z-index: 0;
   pointer-events: none;
 }
