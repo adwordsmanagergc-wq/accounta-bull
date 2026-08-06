@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import Logo from '../components/Logo'
 import { notificationPermission, notificationsSupported } from '../lib/notify'
-import { enablePush, pushConfigured, pushSupported } from '../lib/push'
+import { enablePush, pushConfigured, pushSupported, sendTestPush } from '../lib/push'
 
 export default function Profile() {
   const { user, profile, signOut } = useAuth()
@@ -27,6 +27,13 @@ export default function Profile() {
     else if (result === 'unconfigured')
       showToast('Push key not set yet — notifications work while the app is open.', 'ℹ️')
     else showToast('Could not enable push — try again.', '⚠️')
+  }
+
+  async function testNotification() {
+    setBusy(true)
+    const r = await sendTestPush()
+    setBusy(false)
+    showToast(r.message, r.ok ? '✅' : '⚠️')
   }
 
   const pushReady = pushConfigured && pushSupported()
@@ -81,6 +88,16 @@ export default function Profile() {
               </button>
             )}
           </div>
+          {perm === 'granted' && pushReady && (
+            <button
+              className="btn btn-ghost btn-sm"
+              style={{ marginTop: 12 }}
+              disabled={busy}
+              onClick={testNotification}
+            >
+              {busy ? '…' : '🔔 Send a test notification'}
+            </button>
+          )}
         </div>
       )}
 

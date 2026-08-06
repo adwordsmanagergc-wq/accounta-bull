@@ -88,6 +88,54 @@ export async function ensurePushSubscribed(userId: string): Promise<void> {
   await enablePush(userId)
 }
 
+export interface TestPushResult {
+  ok: boolean
+  subscriptions: number
+  sent: number
+  message: string
+}
+
+/** Ask the Edge Function to push a test notification to this device right now. */
+export async function sendTestPush(): Promise<TestPushResult> {
+  try {
+    const { data, error } = await supabase.functions.invoke('send-push', {
+      body: { test: true },
+    })
+    if (error) {
+      return {
+        ok: false,
+        subscriptions: 0,
+        sent: 0,
+        message:
+          'Couldn’t reach the push function. Make sure the send-push Edge Function is deployed.',
+      }
+    }
+    const subs = Number(data?.subscriptions ?? 0)
+    const sent = Number(data?.sent ?? 0)
+    if (sent > 0) return { ok: true, subscriptions: subs, sent, message: 'Test push sent 🎉' }
+    if (subs === 0)
+      return {
+        ok: false,
+        subscriptions: 0,
+        sent: 0,
+        message: 'This device isn’t subscribed yet — tap Enable first (and check the VAPID key).',
+      }
+    return {
+      ok: false,
+      subscriptions: subs,
+      sent: 0,
+      message: 'Subscription found but the push failed — check the VAPID keys on the server.',
+    }
+  } catch {
+    return {
+      ok: false,
+      subscriptions: 0,
+      sent: 0,
+      message: 'Could not send a test push — is the Edge Function deployed?',
+    }
+  }
+}
+
 /** Keep the user's timezone in sync so server pushes fire at the right local time. */
 export async function syncTimezone(userId: string, current?: string | null): Promise<void> {
   try {

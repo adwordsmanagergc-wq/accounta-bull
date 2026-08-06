@@ -60,14 +60,24 @@ app is closed** — on desktop and Android, and on iPhone when the app has been
    );
    ```
 
-## Test it
+## Test it (instant — no 30-min wait)
 
-- Enable notifications on the Profile page (grant permission).
-- Create a goal scheduled ~32 minutes out, today.
-- Invoke once manually and watch the logs (`due / sent / cleaned`):
-  ```bash
-  supabase functions invoke send-push --no-verify-jwt
-  ```
+After deploying, open the app → **Profile → 🔔 Send a test notification**. This
+calls the function in *test mode* (`{ "test": true }`), which pushes to your
+signed-in device immediately and reports back:
+
+- **"Test push sent 🎉"** → the whole chain works.
+- **"This device isn't subscribed yet"** → tap **Enable** first (and confirm
+  `VITE_VAPID_PUBLIC_KEY` is set in Vercel and the app was redeployed).
+- **"Subscription found but the push failed"** → check the VAPID secrets on the
+  server (`VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY`).
+- **"Couldn't reach the push function"** → the function isn't deployed.
+
+You can also invoke the cron path manually and watch the logs (`due / sent`):
+```bash
+supabase functions invoke send-push --no-verify-jwt
+```
+To test the real 30-min flow: create a goal ~32 minutes out (today) and wait.
 
 ## Turn it off
 

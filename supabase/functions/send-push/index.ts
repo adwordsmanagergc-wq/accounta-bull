@@ -57,11 +57,79 @@ function localNow(tz: string) {
   }
 }
 
-Deno.serve(async () => {
+const CORS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...CORS, 'Content-Type': 'application/json' },
+  })
+
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS })
+
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   )
+
+  // Read an optional JSON body (the cron sends none).
+  let reqBody: { test?: boolean } = {}
+  try {
+    reqBody = await req.json()
+  } catch {
+    /* no body */
+  }
+
+  // --- Test mode: push immediately to the signed-in caller's devices ---------
+  if (reqBody.test) {
+    const authClient = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_ANON_KEY')!,
+      { global: { headers: { Authorization: req.headers.get('Authorization') ?? '' } } }
+    )
+    const {
+      data: { user },
+    } = await authClient.auth.getUser()
+    if (!user) return json({ error: 'not-authenticated' }, 401)
+
+    const { data: subs } = await supabase
+      .from('push_subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+
+    const payload = JSON.stringify({
+      title: '⚡ Test Charge Call',
+      body: 'Push is working! You’ll get a real boost 30 min before each goal. 🐂',
+      url: '/',
+      icon: '/icon-192.png',
+      tag: 'test-push',
+    })
+
+    let tSent = 0
+    let tCleaned = 0
+    for (const s of (subs as Sub[]) ?? []) {
+      try {
+        await webpush.sendNotification(
+          { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
+          payload
+        )
+        tSent++
+      } catch (err) {
+        const status = (err as { statusCode?: number }).statusCode
+        if (status === 404 || status === 410) {
+          await supabase.from('push_subscriptions').delete().eq('id', s.id)
+          tCleaned++
+        } else {
+          console.error('test push error', status, err)
+        }
+      }
+    }
+    return json({ test: true, subscriptions: (subs as Sub[])?.length ?? 0, sent: tSent, cleaned: tCleaned })
+  }
 
   const [{ data: goals }, { data: profiles }, { data: messages }] = await Promise.all([
     supabase.from('goals').select('*').eq('active', true),
@@ -133,7 +201,5 @@ Deno.serve(async () => {
     }
   }
 
-  return new Response(JSON.stringify({ due: due.length, sent, cleaned }), {
-    headers: { 'Content-Type': 'application/json' },
-  })
+  return json({ due: due.length, sent, cleaned })
 })
