@@ -174,7 +174,10 @@ select {
   border-radius: 12px;
   color: var(--text);
   padding: 13px 14px;
-  font-size: 15px;
+  /* Keep at 16px+ so iOS Safari doesn't auto-zoom on focus. That zoom sticks
+     across client-side navigation and makes the app look "small" after login
+     until a hard refresh. */
+  font-size: 16px;
   outline: none;
 }
 .input:focus,
