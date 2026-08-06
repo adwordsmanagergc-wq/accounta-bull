@@ -14,7 +14,7 @@ const features: Feature[] = [
   {
     icon: '',
     title: 'Positive Pushes',
-    body: '',
+    body: 'A gentle psychological push you’ll sometimes need.',
     video: `${import.meta.env.BASE_URL}chargecalls-bg.mp4`,
     poster: `${import.meta.env.BASE_URL}chargecalls-bg.jpg`,
   },
