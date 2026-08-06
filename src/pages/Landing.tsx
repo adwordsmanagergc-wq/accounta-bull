@@ -25,9 +25,10 @@ const features: Feature[] = [
     image: `${import.meta.env.BASE_URL}yourherd-bg.webp`,
   },
   {
-    icon: '🏆',
+    icon: '',
     title: 'Earn Horns',
     body: 'Points for showing up. Redeem for free membership and more.',
+    image: `${import.meta.env.BASE_URL}yourherd-bg.webp`,
   },
 ]
 
