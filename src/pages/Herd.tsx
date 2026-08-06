@@ -18,9 +18,10 @@ import {
   addCheer,
   type Cheer,
 } from '../lib/herd'
-import { uploadHerdPhoto } from '../lib/storage'
+import { uploadHerdPhoto, signedProgressUrl } from '../lib/storage'
 import { fetchHerdSharedPhotos } from '../lib/progress'
-import { signedProgressUrl } from '../lib/storage'
+import { fetchHerdSharedTargets, targetPercent, daysLeft, type ProgressTarget } from '../lib/targets'
+import { addFeedback, fetchFeedback, type PhotoFeedback } from '../lib/feedback'
 import type { ChallengeCheckin, HerdPartner, ProgressPhoto, SharedChallenge } from '../lib/types'
 
 export default function Herd() {
@@ -33,6 +34,8 @@ export default function Herd() {
   const [checkins, setCheckins] = useState<ChallengeCheckin[]>([])
   const [cheers, setCheers] = useState<Cheer[]>([])
   const [sharedPhotos, setSharedPhotos] = useState<ProgressPhoto[]>([])
+  const [sharedTargets, setSharedTargets] = useState<ProgressTarget[]>([])
+  const [feedback, setFeedback] = useState<PhotoFeedback[]>([])
   const [loaded, setLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -58,12 +61,17 @@ export default function Herd() {
         setCheers(await fetchCheers(ids).catch(() => []))
         // Partner-shared progress photos (RLS returns shared ones; drop my own).
         const shared = await fetchHerdSharedPhotos().catch(() => [])
-        setSharedPhotos(shared.filter((p) => p.user_id !== user.id))
+        const partnerPhotos = shared.filter((p) => p.user_id !== user.id)
+        setSharedPhotos(partnerPhotos)
+        setSharedTargets(await fetchHerdSharedTargets(user.id).catch(() => []))
+        setFeedback(await fetchFeedback(partnerPhotos.map((p) => p.id)).catch(() => []))
       } else {
         setChallenges([])
         setCheckins([])
         setCheers([])
         setSharedPhotos([])
+        setSharedTargets([])
+        setFeedback([])
       }
     } catch (e) {
       console.error(e)
@@ -211,20 +219,68 @@ export default function Herd() {
         />
       ))}
 
-      {sharedPhotos.length > 0 && (
+      {sharedTargets.length > 0 && (
         <div style={{ marginTop: 6 }}>
+          <div className="steps-heading" style={{ margin: '0 0 10px' }}>
+            🎯 Herd targets
+          </div>
+          <div className="stack">
+            {sharedTargets.map((t) => {
+              const pct = targetPercent(t)
+              const dl = daysLeft(t)
+              return (
+                <div className="card target-card" key={t.id}>
+                  <div className="goal-title">{t.title}</div>
+                  <div className="target-bar" style={{ marginTop: 8 }}>
+                    <div className="target-fill" style={{ width: `${pct}%` }} />
+                  </div>
+                  <div className="row between" style={{ marginTop: 6 }}>
+                    <span className="faint" style={{ fontSize: 12 }}>
+                      {t.current_value} / {t.target_value} {t.unit}
+                      {dl != null && dl >= 0 ? ` · ${dl}d left` : ''}
+                    </span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--orange)' }}>{pct}%</span>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {sharedPhotos.length > 0 && (
+        <div style={{ marginTop: 16 }}>
           <div className="steps-heading" style={{ margin: '0 0 10px' }}>
             📸 Shared by your herd
           </div>
-          <div className="photo-grid">
+          <div className="stack">
             {sharedPhotos.map((p) => (
-              <SharedPhoto key={p.id} photo={p} />
+              <SharedPhoto
+                key={p.id}
+                photo={p}
+                feedback={feedback.filter((f) => f.photo_id === p.id)}
+                onFeedback={(emoji, message) => sendFeedback(p.id, emoji, message)}
+              />
             ))}
           </div>
         </div>
       )}
     </div>
   )
+
+  async function sendFeedback(photoId: string, emoji: string, message: string) {
+    if (!user) return
+    setFeedback((f) => [
+      { id: `local-${Date.now()}`, photo_id: photoId, from_user: user.id, emoji, message, created_at: '' },
+      ...f,
+    ])
+    try {
+      await addFeedback(user.id, photoId, emoji, message)
+    } catch (e) {
+      console.error(e)
+      showToast('Could not send feedback.', '⚠️')
+    }
+  }
 
   async function cheer(challengeId: string, emoji: string) {
     if (!user) return
@@ -240,8 +296,17 @@ export default function Herd() {
   }
 }
 
-function SharedPhoto({ photo }: { photo: ProgressPhoto }) {
+function SharedPhoto({
+  photo,
+  feedback,
+  onFeedback,
+}: {
+  photo: ProgressPhoto
+  feedback: PhotoFeedback[]
+  onFeedback: (emoji: string, message: string) => void
+}) {
   const [url, setUrl] = useState<string | null>(null)
+  const [msg, setMsg] = useState('')
   useEffect(() => {
     let ok = true
     signedProgressUrl(photo.storage_path).then((u) => ok && setUrl(u))
@@ -249,11 +314,52 @@ function SharedPhoto({ photo }: { photo: ProgressPhoto }) {
       ok = false
     }
   }, [photo.storage_path])
+
   return (
-    <div className="photo-tile">
-      {url ? <img src={url} alt="shared progress" /> : <div className="photo-skeleton" />}
-      <div className="photo-meta">
-        <span>{photo.taken_on}</span>
+    <div className="card shared-photo">
+      <div className="shared-photo-media">
+        {url ? <img src={url} alt="shared progress" /> : <div className="photo-skeleton" />}
+        <div className="photo-meta">
+          <span>{photo.taken_on}</span>
+        </div>
+      </div>
+
+      {feedback.length > 0 && (
+        <div className="feedback-list">
+          {feedback.map((f) => (
+            <div className="feedback-item" key={f.id}>
+              <span>{f.emoji}</span>
+              {f.message && <span className="feedback-msg">{f.message}</span>}
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="feedback-quick">
+        {['🔥', '💪', '👏', '😍', '🐂'].map((e) => (
+          <button key={e} className="cheer-btn" onClick={() => onFeedback(e, '')} title="Send love">
+            {e}
+          </button>
+        ))}
+      </div>
+      <div className="row" style={{ gap: 8, marginTop: 8 }}>
+        <input
+          className="input"
+          placeholder="Say something encouraging…"
+          value={msg}
+          onChange={(e) => setMsg(e.target.value)}
+          style={{ flex: 1 }}
+        />
+        <button
+          className="btn btn-primary btn-sm"
+          disabled={!msg.trim()}
+          onClick={() => {
+            onFeedback('💬', msg.trim())
+            setMsg('')
+          }}
+        >
+          Send
+        </button>
       </div>
     </div>
   )

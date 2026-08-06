@@ -15,6 +15,8 @@ import {
   type Measurement,
 } from '../lib/measurements'
 import WeightChart from '../components/WeightChart'
+import Targets from '../components/Targets'
+import { fetchFeedback, type PhotoFeedback } from '../lib/feedback'
 import { todayKey } from '../lib/game'
 import { PHASES, type PhotoPhase, type ProgressPhoto } from '../lib/types'
 
@@ -34,6 +36,8 @@ export default function Progress() {
   const [uploading, setUploading] = useState(false)
   const [compare, setCompare] = useState(false)
 
+  const [feedback, setFeedback] = useState<PhotoFeedback[]>([])
+
   // Measurements
   const [measurements, setMeasurements] = useState<Measurement[]>([])
   const [weight, setWeight] = useState('')
@@ -44,11 +48,17 @@ export default function Progress() {
     if (!user) return
     setError(null)
     try {
-      setPhotos(await fetchProgressPhotos(user.id))
+      const ph = await fetchProgressPhotos(user.id)
+      setPhotos(ph)
       try {
         setMeasurements(await fetchMeasurements(user.id))
       } catch {
         /* measurements table may not be migrated yet */
+      }
+      try {
+        setFeedback(await fetchFeedback(ph.map((p) => p.id)))
+      } catch {
+        /* feedback table may not be migrated yet */
       }
     } catch (e) {
       console.error(e)
@@ -190,6 +200,9 @@ export default function Progress() {
 
       {error && <div className="form-error">{error}</div>}
 
+      {/* Targets — set a goal value + date and track % */}
+      {user && <Targets userId={user.id} />}
+
       {/* Measurements + chart */}
       <div className="card stack" style={{ marginBottom: 18 }}>
         <div style={{ fontWeight: 700 }}>Weight log</div>
@@ -257,6 +270,7 @@ export default function Progress() {
                 <PhotoTile
                   key={photo.id}
                   photo={photo}
+                  feedback={feedback.filter((f) => f.photo_id === photo.id)}
                   onDelete={() => onDelete(photo)}
                   onToggleShare={() => toggleShare(photo)}
                 />
@@ -283,10 +297,12 @@ function usePhotoUrl(path: string) {
 
 function PhotoTile({
   photo,
+  feedback,
   onDelete,
   onToggleShare,
 }: {
   photo: ProgressPhoto
+  feedback: PhotoFeedback[]
   onDelete: () => void
   onToggleShare: () => void
 }) {
@@ -304,6 +320,11 @@ function PhotoTile({
       >
         {photo.shared_with_herd ? '🤝' : '🔒'}
       </button>
+      {feedback.length > 0 && (
+        <div className="photo-feedback" title={feedback.map((f) => f.message).filter(Boolean).join(' · ')}>
+          {feedback.map((f) => f.emoji).slice(0, 6).join('')} {feedback.length}
+        </div>
+      )}
       <div className="photo-meta">
         <span>{photo.taken_on}</span>
         {photo.note && <span className="photo-note">{photo.note}</span>}
