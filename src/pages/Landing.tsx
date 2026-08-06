@@ -6,6 +6,8 @@ const features = [
     icon: '🚩',
     title: 'Charge Calls',
     body: 'A boost 30 minutes before every goal — a push, not a nag.',
+    video: `${import.meta.env.BASE_URL}chargecalls-bg.mp4`,
+    poster: `${import.meta.env.BASE_URL}chargecalls-bg.jpg`,
   },
   {
     icon: '🐂',
@@ -40,7 +42,23 @@ export default function Landing() {
 
       <div className="stack landing-features">
         {features.map((f) => (
-          <div className="feature-card" key={f.title}>
+          <div className={`feature-card${f.video ? ' has-video' : ''}`} key={f.title}>
+            {f.video && (
+              <>
+                <video
+                  className="feature-video"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  poster={f.poster}
+                >
+                  <source src={f.video} type="video/mp4" />
+                </video>
+                <span className="feature-video-scrim" />
+              </>
+            )}
             <span className="feature-icon">{f.icon}</span>
             <div>
               <div className="feature-title">{f.title}</div>
