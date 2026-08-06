@@ -439,28 +439,29 @@ select {
   width: 24px;
   text-align: center;
 }
-/* Positive Pushes card with a looping muted video background. Keep the same
-   top-aligned layout as the other cards so its title lines up with theirs. */
-.feature-card.has-video {
+/* Cards with a photo/video background. Keep the same top-aligned layout as the
+   other cards so the title lines up with theirs. */
+.feature-card.has-media {
   position: relative;
   overflow: hidden;
   border-color: var(--border-strong);
 }
-.feature-card.has-video > .feature-icon,
-.feature-card.has-video > div {
+.feature-card.has-media > .feature-icon,
+.feature-card.has-media > div {
   position: relative;
   z-index: 2;
 }
-.feature-video {
+.feature-media {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center 40%;
   z-index: 0;
 }
-/* Dark scrim so the white text stays readable over the video */
-.feature-video-scrim {
+/* Dark scrim so the white text stays readable over the media */
+.feature-media-scrim {
   position: absolute;
   inset: 0;
   z-index: 1;

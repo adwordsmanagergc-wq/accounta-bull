@@ -1,7 +1,16 @@
 import { Link } from 'react-router-dom'
 import Logo from '../components/Logo'
 
-const features = [
+type Feature = {
+  icon: string
+  title: string
+  body: string
+  video?: string
+  poster?: string
+  image?: string
+}
+
+const features: Feature[] = [
   {
     icon: '',
     title: 'Positive Pushes',
@@ -10,9 +19,10 @@ const features = [
     poster: `${import.meta.env.BASE_URL}chargecalls-bg.jpg`,
   },
   {
-    icon: '🐂',
+    icon: '',
     title: 'Your Herd',
     body: 'Matched with people your age chasing the same goals.',
+    image: `${import.meta.env.BASE_URL}yourherd-bg.webp`,
   },
   {
     icon: '🏆',
@@ -41,12 +51,13 @@ export default function Landing() {
       </p>
 
       <div className="stack landing-features">
-        {features.map((f) => (
-          <div className={`feature-card${f.video ? ' has-video' : ''}`} key={f.title}>
-            {f.video && (
-              <>
+        {features.map((f) => {
+          const hasMedia = !!(f.video || f.image)
+          return (
+            <div className={`feature-card${hasMedia ? ' has-media' : ''}`} key={f.title}>
+              {f.video && (
                 <video
-                  className="feature-video"
+                  className="feature-media"
                   autoPlay
                   muted
                   loop
@@ -56,16 +67,17 @@ export default function Landing() {
                 >
                   <source src={f.video} type="video/mp4" />
                 </video>
-                <span className="feature-video-scrim" />
-              </>
-            )}
-            <span className="feature-icon">{f.icon}</span>
-            <div>
-              <div className="feature-title">{f.title}</div>
-              {f.body && <div className="feature-body">{f.body}</div>}
+              )}
+              {f.image && <img className="feature-media" src={f.image} alt="" />}
+              {hasMedia && <span className="feature-media-scrim" />}
+              <span className="feature-icon">{f.icon}</span>
+              <div>
+                <div className="feature-title">{f.title}</div>
+                {f.body && <div className="feature-body">{f.body}</div>}
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <div className="landing-cta">
