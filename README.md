@@ -52,6 +52,8 @@ To swap in a new logo later, replace those two files (same names). If
      challenges with rewards/forfeits and a scoreboard)
    - `supabase/migrations/0004_push.sql` (Web Push subscriptions + timezone,
      for background charge-call notifications)
+   - `supabase/migrations/0005_photos_herd.sql` (profile pictures + progress
+     photos via Storage buckets; herd name/photo/rules; challenge rules)
 3. **Project Settings → API** → copy the **Project URL** and **anon public key**
    into `.env`:
    ```
