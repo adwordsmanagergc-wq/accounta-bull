@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
@@ -14,6 +14,7 @@ export default function Profile() {
   const { user, profile, signOut, refreshProfile } = useAuth()
   const { showToast } = useToast()
   const [perm, setPerm] = useState(notificationPermission())
+  const [subscribed, setSubscribed] = useState(false)
   const [busy, setBusy] = useState(false)
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -83,6 +84,28 @@ export default function Profile() {
     }
   }
 
+  // Is this device actually subscribed to push right now? Permission being
+  // "granted" is not enough, the subscription can be missing (never created, or
+  // cleared), which would leave Test with nothing to send to.
+  async function checkSubscription() {
+    if (!pushSupported()) {
+      setSubscribed(false)
+      return
+    }
+    try {
+      const reg = await navigator.serviceWorker.getRegistration()
+      const sub = reg ? await reg.pushManager.getSubscription() : null
+      setSubscribed(!!sub)
+    } catch {
+      setSubscribed(false)
+    }
+  }
+
+  useEffect(() => {
+    checkSubscription()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   async function enableNotifications() {
     if (!user) return
     setBusy(true)
@@ -90,6 +113,7 @@ export default function Profile() {
     // otherwise falls back to in-app notifications while the tab is open.
     const result = await enablePush(user.id)
     setPerm(notificationPermission())
+    await checkSubscription()
     setBusy(false)
     if (result === 'ok') showToast('Charge-call push on 🔔, even when the app is closed', '⚡')
     else if (result === 'denied')
@@ -201,22 +225,22 @@ export default function Profile() {
             <div>
               <div style={{ fontWeight: 700 }}>Charge-call notifications</div>
               <div className="muted" style={{ fontSize: 13 }}>
-                {perm === 'granted'
-                  ? pushReady
-                    ? 'On, pushed 30 min before each goal, even when the app is closed.'
-                    : 'On, you’ll get a nudge 30 min before each goal while the app is open.'
-                  : perm === 'denied'
-                    ? 'Blocked in your browser settings.'
+                {perm === 'denied'
+                  ? 'Blocked in your browser settings.'
+                  : subscribed
+                    ? pushReady
+                      ? 'On, pushed 30 min before each goal, even when the app is closed.'
+                      : 'On, you’ll get a nudge 30 min before each goal while the app is open.'
                     : 'Get a nudge 30 min before each goal.'}
               </div>
             </div>
-            {perm !== 'granted' && (
+            {perm !== 'denied' && !subscribed && (
               <button className="btn btn-ghost btn-sm" disabled={busy} onClick={enableNotifications}>
                 {busy ? '…' : 'Enable'}
               </button>
             )}
           </div>
-          {perm === 'granted' && pushReady && (
+          {subscribed && pushReady && (
             <button
               className="btn btn-ghost btn-sm"
               style={{ marginTop: 12 }}
