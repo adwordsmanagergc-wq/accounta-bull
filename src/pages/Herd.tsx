@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { appUrl } from '../lib/supabase'
+import Avatar from '../components/Avatar'
 import {
   acceptInvite,
   checkinToday,
@@ -12,7 +13,9 @@ import {
   fetchChallenges,
   fetchCheckins,
   fetchPartners,
+  updateHerd,
 } from '../lib/herd'
+import { uploadHerdPhoto } from '../lib/storage'
 import type { ChallengeCheckin, HerdPartner, SharedChallenge } from '../lib/types'
 
 export default function Herd() {
@@ -215,8 +218,16 @@ function PartnerBlock({
   const [title, setTitle] = useState('')
   const [reward, setReward] = useState('')
   const [forfeit, setForfeit] = useState('')
+  const [rules, setRules] = useState('')
   const [days, setDays] = useState(7)
   const [busy, setBusy] = useState(false)
+
+  // Herd (group) editing
+  const [editHerd, setEditHerd] = useState(false)
+  const [herdName, setHerdName] = useState(partner.herdName ?? '')
+  const [herdRules, setHerdRules] = useState(partner.herdRules ?? '')
+  const [savingHerd, setSavingHerd] = useState(false)
+  const photoRef = useRef<HTMLInputElement>(null)
 
   const partnerName = partner.name?.trim().split(' ')[0] || 'Partner'
 
@@ -224,10 +235,17 @@ function PartnerBlock({
     if (busy || !title.trim()) return
     setBusy(true)
     try {
-      await createChallenge(me.id, partner.connectionId, { title: title.trim(), reward, forfeit, days })
+      await createChallenge(me.id, partner.connectionId, {
+        title: title.trim(),
+        reward,
+        forfeit,
+        rules,
+        days,
+      })
       setTitle('')
       setReward('')
       setForfeit('')
+      setRules('')
       setDays(7)
       setShowForm(false)
       showToast('Challenge set! May the best charge win 🐂', '🏁')
@@ -240,12 +258,106 @@ function PartnerBlock({
     }
   }
 
+  async function saveHerd() {
+    setSavingHerd(true)
+    try {
+      await updateHerd(partner.connectionId, {
+        name: herdName.trim() || null,
+        rules: herdRules.trim() || null,
+      })
+      setEditHerd(false)
+      showToast('Herd updated 🐂', '✅')
+      await onChanged()
+    } catch (e) {
+      showToast('Could not save the herd.', '⚠️')
+      console.error(e)
+    } finally {
+      setSavingHerd(false)
+    }
+  }
+
+  async function onPickHerdPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setSavingHerd(true)
+    try {
+      const url = await uploadHerdPhoto(me.id, partner.connectionId, file)
+      await updateHerd(partner.connectionId, { photo_url: url })
+      showToast('Herd photo updated 📸', '✅')
+      await onChanged()
+    } catch (err) {
+      showToast('Could not upload the herd photo.', '⚠️')
+      console.error(err)
+    } finally {
+      setSavingHerd(false)
+    }
+  }
+
   return (
     <div style={{ marginBottom: 18 }}>
-      <div className="partner-head">
-        <div className="partner-avatar">🐂</div>
+      {/* Herd group banner */}
+      <div className="herd-banner">
+        <button
+          className="herd-photo"
+          onClick={() => photoRef.current?.click()}
+          disabled={savingHerd}
+          title="Change herd photo"
+        >
+          {partner.herdPhoto ? <img src={partner.herdPhoto} alt="herd" /> : <span>🐂</span>}
+          <span className="avatar-cam">📷</span>
+        </button>
+        <input ref={photoRef} type="file" accept="image/*" hidden onChange={onPickHerdPhoto} />
         <div style={{ flex: 1 }}>
-          <div className="partner-name">{partnerName}</div>
+          <div className="partner-name">{partner.herdName || `You & ${partnerName}`}</div>
+          <div className="faint" style={{ fontSize: 13 }}>
+            Herd of 2
+          </div>
+        </div>
+        <button className="link-btn" style={{ fontSize: 13 }} onClick={() => setEditHerd((v) => !v)}>
+          {editHerd ? 'Close' : 'Edit'}
+        </button>
+      </div>
+
+      {editHerd && (
+        <div className="card stack" style={{ marginBottom: 12 }}>
+          <div className="field">
+            <label>Herd name</label>
+            <input
+              className="input"
+              value={herdName}
+              onChange={(e) => setHerdName(e.target.value)}
+              placeholder="e.g. The Dawn Chargers"
+            />
+          </div>
+          <div className="field">
+            <label>Herd rules</label>
+            <textarea
+              className="input"
+              rows={3}
+              value={herdRules}
+              onChange={(e) => setHerdRules(e.target.value)}
+              placeholder="e.g. Check in by 9pm. No excuses. Winner picks next challenge."
+            />
+          </div>
+          <button className="btn btn-primary" disabled={savingHerd} onClick={saveHerd}>
+            {savingHerd ? 'Saving…' : 'Save herd'}
+          </button>
+        </div>
+      )}
+
+      {partner.herdRules && !editHerd && (
+        <div className="herd-rules">
+          <strong>📜 Rules:</strong> {partner.herdRules}
+        </div>
+      )}
+
+      <div className="partner-head">
+        <Avatar url={partner.avatarUrl} name={partner.name} size={44} />
+        <div style={{ flex: 1 }}>
+          <div className="partner-name" style={{ fontSize: 16 }}>
+            {partnerName}
+          </div>
           <div className="faint" style={{ fontSize: 13 }}>
             🏆 {partner.horns} horns · {partner.streak}🔥 streak
           </div>
@@ -296,6 +408,16 @@ function PartnerBlock({
                 placeholder="e.g. Post an embarrassing selfie"
                 value={forfeit}
                 onChange={(e) => setForfeit(e.target.value)}
+              />
+            </div>
+            <div className="field">
+              <label>📜 Rules (optional)</label>
+              <textarea
+                className="input"
+                rows={2}
+                placeholder="e.g. Counts only if done before 8am. Photo proof required."
+                value={rules}
+                onChange={(e) => setRules(e.target.value)}
               />
             </div>
             <div className="field">
@@ -409,6 +531,11 @@ function ChallengeCard({
           {challenge.forfeit && (
             <div>
               😅 <strong>Forfeit:</strong> {challenge.forfeit}
+            </div>
+          )}
+          {challenge.rules && (
+            <div>
+              📜 <strong>Rules:</strong> {challenge.rules}
             </div>
           )}
         </div>

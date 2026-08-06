@@ -31,7 +31,7 @@ export async function fetchPartners(userId: string): Promise<HerdPartner[]> {
   const partnerIds = connections.map((c) => (c.user_low === userId ? c.user_high : c.user_low))
   const { data: profiles, error } = await supabase
     .from('profiles')
-    .select('id, name, horns, streak')
+    .select('id, name, horns, streak, avatar_url')
     .in('id', partnerIds)
   if (error) throw error
   const byId = new Map((profiles as Partial<Profile>[]).map((p) => [p.id as string, p]))
@@ -42,10 +42,23 @@ export async function fetchPartners(userId: string): Promise<HerdPartner[]> {
       connectionId: c.id,
       userId: pid,
       name: p?.name ?? null,
+      avatarUrl: p?.avatar_url ?? null,
       horns: p?.horns ?? 0,
       streak: p?.streak ?? 0,
+      herdName: c.name ?? null,
+      herdPhoto: c.photo_url ?? null,
+      herdRules: c.rules ?? null,
     }
   })
+}
+
+/** Update shared herd metadata (name / group photo / rules). */
+export async function updateHerd(
+  connectionId: string,
+  patch: { name?: string | null; photo_url?: string | null; rules?: string | null }
+): Promise<void> {
+  const { error } = await supabase.from('herd_connections').update(patch).eq('id', connectionId)
+  if (error) throw error
 }
 
 /** Create a shareable invite code for the current user. */
@@ -87,7 +100,7 @@ export async function fetchChallenges(connectionId: string): Promise<SharedChall
 export async function createChallenge(
   userId: string,
   connectionId: string,
-  input: { title: string; reward: string; forfeit: string; days: number }
+  input: { title: string; reward: string; forfeit: string; rules: string; days: number }
 ): Promise<void> {
   const start = new Date()
   const end = new Date()
@@ -98,6 +111,7 @@ export async function createChallenge(
     title: input.title,
     reward: input.reward || null,
     forfeit: input.forfeit || null,
+    rules: input.rules || null,
     starts_on: todayKey(start),
     ends_on: todayKey(end),
   })

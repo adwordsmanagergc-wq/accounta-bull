@@ -20,6 +20,26 @@ export interface Profile {
   horns: number
   streak: number
   timezone: string | null
+  avatar_url: string | null
+  bio: string | null
+  created_at: string
+}
+
+export type PhotoPhase = 'before' | 'during' | 'after'
+
+export const PHASES: { value: PhotoPhase; label: string; emoji: string }[] = [
+  { value: 'before', label: 'Before', emoji: '📍' },
+  { value: 'during', label: 'During', emoji: '💪' },
+  { value: 'after', label: 'After', emoji: '🏆' },
+]
+
+export interface ProgressPhoto {
+  id: string
+  user_id: string
+  phase: PhotoPhase
+  storage_path: string
+  taken_on: string
+  note: string | null
   created_at: string
 }
 
@@ -53,6 +73,9 @@ export interface HerdConnection {
   id: string
   user_low: string
   user_high: string
+  name: string | null
+  photo_url: string | null
+  rules: string | null
   created_at: string
 }
 
@@ -60,8 +83,12 @@ export interface HerdPartner {
   connectionId: string
   userId: string
   name: string | null
+  avatarUrl: string | null
   horns: number
   streak: number
+  herdName: string | null
+  herdPhoto: string | null
+  herdRules: string | null
 }
 
 export interface SharedChallenge {
@@ -71,6 +98,7 @@ export interface SharedChallenge {
   title: string
   reward: string | null
   forfeit: string | null
+  rules: string | null
   starts_on: string
   ends_on: string
   active: boolean

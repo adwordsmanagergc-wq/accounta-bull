@@ -1,15 +1,39 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
-import Logo from '../components/Logo'
+import Avatar from '../components/Avatar'
 import { notificationPermission, notificationsSupported } from '../lib/notify'
 import { enablePush, pushConfigured, pushSupported, sendTestPush } from '../lib/push'
+import { uploadAvatar } from '../lib/storage'
+import { supabase } from '../lib/supabase'
 
 export default function Profile() {
-  const { user, profile, signOut } = useAuth()
+  const { user, profile, signOut, refreshProfile } = useAuth()
   const { showToast } = useToast()
   const [perm, setPerm] = useState(notificationPermission())
   const [busy, setBusy] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
+
+  async function onPickAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file || !user) return
+    setUploading(true)
+    try {
+      const url = await uploadAvatar(user.id, file)
+      const { error } = await supabase.from('profiles').update({ avatar_url: url }).eq('id', user.id)
+      if (error) throw error
+      await refreshProfile()
+      showToast('Profile picture updated 📸', '✅')
+    } catch (err) {
+      console.error(err)
+      showToast('Could not upload — make sure the storage setup has been run.', '⚠️')
+    } finally {
+      setUploading(false)
+    }
+  }
 
   async function enableNotifications() {
     if (!user) return
@@ -45,16 +69,38 @@ export default function Profile() {
       </div>
 
       <div className="card center" style={{ marginBottom: 16 }}>
-        <div className="brand-mark">
-          <Logo size={72} />
-        </div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 20 }}>
+        <button
+          className="avatar-edit"
+          onClick={() => fileRef.current?.click()}
+          disabled={uploading}
+          title="Change profile picture"
+        >
+          <Avatar url={profile?.avatar_url} name={profile?.name} size={96} />
+          <span className="avatar-cam">{uploading ? '…' : '📷'}</span>
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={onPickAvatar}
+        />
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, marginTop: 10 }}>
           {profile?.name || 'Herd member'}
         </div>
         <div className="muted" style={{ fontSize: 14 }}>
           {user?.email}
         </div>
+        {profile?.bio && (
+          <div className="muted" style={{ fontSize: 14, marginTop: 8 }}>
+            {profile.bio}
+          </div>
+        )}
       </div>
+
+      <Link to="/progress" className="btn btn-ghost" style={{ marginBottom: 16 }}>
+        📸 Progress photos
+      </Link>
 
       <div className="stat-grid" style={{ marginBottom: 16 }}>
         <div className="card stat">
