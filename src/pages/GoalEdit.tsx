@@ -163,10 +163,10 @@ export default function GoalEdit() {
             value={horns}
             onChange={(e) => setHorns(Number(e.target.value))}
           >
-            <option value={5}>5 — easy</option>
-            <option value={10}>10 — standard</option>
-            <option value={20}>20 — tough</option>
-            <option value={30}>30 — big win</option>
+            <option value={5}>5, easy</option>
+            <option value={10}>10, standard</option>
+            <option value={20}>20, tough</option>
+            <option value={30}>30, big win</option>
           </select>
         </div>
 

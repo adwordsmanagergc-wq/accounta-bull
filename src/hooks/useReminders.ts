@@ -9,7 +9,7 @@ const CHECK_MS = 60_000
 /**
  * While the app is open, poll once a minute for goals starting within the next
  * 30 minutes. When one first enters that window we fire a browser notification
- * and open the Boost screen — once per goal per day.
+ * and open the Boost screen, once per goal per day.
  */
 export function useReminders(userId: string | undefined) {
   const navigate = useNavigate()
@@ -50,7 +50,7 @@ export function useReminders(userId: string | undefined) {
           break
         }
       } catch {
-        /* transient network / not configured — try again next tick */
+        /* transient network / not configured, try again next tick */
       }
     }
 

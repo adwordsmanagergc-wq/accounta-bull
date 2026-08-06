@@ -45,7 +45,7 @@ export default function Login() {
     })
     setLoading(false)
     if (error) setError(error.message)
-    else setNote('Magic link sent — check your email to log in.')
+    else setNote('Magic link sent, check your email to log in.')
   }
 
   return (

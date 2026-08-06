@@ -7,7 +7,7 @@ import { ToastProvider } from './context/ToastContext'
 import './index.css'
 
 // HashRouter (URLs like /accountabull-web/#/today) means GitHub Pages never
-// 404s on a refresh or deep link — the server only ever serves index.html.
+// 404s on a refresh or deep link, the server only ever serves index.html.
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <HashRouter>

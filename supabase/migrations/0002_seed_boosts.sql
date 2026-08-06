@@ -1,4 +1,4 @@
--- Accounta-Bull — seed 30 motivational boost messages
+-- Accounta-Bull, seed 30 motivational boost messages
 -- Safe to re-run: it clears the table first, then re-inserts.
 
 truncate table public.boost_messages restart identity;
@@ -28,14 +28,14 @@ insert into public.boost_messages (category, text) values
   ('mind', 'Stillness is a skill. This is your practice round.'),
   ('mind', 'Show up for your mind like it shows up for you.'),
   -- other (4)
-  ('other', 'Whatever it is — start small, start now, start scrappy.'),
+  ('other', 'Whatever it is, start small, start now, start scrappy.'),
   ('other', 'The goal doesn''t care how you feel. Feelings follow action.'),
   ('other', 'Two minutes in and you''ll wonder why you waited.'),
   ('other', 'Show up. That''s the whole game.'),
-  -- general (6) — used across every category
+  -- general (6), used across every category
   ('general', 'Discipline is just self-respect on a schedule. Charge.'),
   ('general', 'You didn''t come this far to only come this far.'),
-  ('general', 'The herd is watching. Make them proud — make YOU proud.'),
+  ('general', 'The herd is watching. Make them proud, make YOU proud.'),
   ('general', 'Small wins stack into big horns. Grab this one.'),
   ('general', 'Don''t break the streak. Not today. Not you.'),
   ('general', 'Lower the bar to "just begin," then blow past it.');

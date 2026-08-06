@@ -37,7 +37,7 @@ export async function registerServiceWorker(): Promise<ServiceWorkerRegistration
 
 /**
  * Ask permission (if needed), subscribe to Web Push, and store the subscription
- * in Supabase. Safe to call repeatedly — it upserts the current subscription.
+ * in Supabase. Safe to call repeatedly, it upserts the current subscription.
  */
 export async function enablePush(userId: string): Promise<EnablePushResult> {
   if (!pushSupported()) return 'unsupported'
@@ -118,20 +118,20 @@ export async function sendTestPush(): Promise<TestPushResult> {
         ok: false,
         subscriptions: 0,
         sent: 0,
-        message: 'This device isn’t subscribed yet — tap Enable first (and check the VAPID key).',
+        message: 'This device isn’t subscribed yet, tap Enable first (and check the VAPID key).',
       }
     return {
       ok: false,
       subscriptions: subs,
       sent: 0,
-      message: 'Subscription found but the push failed — check the VAPID keys on the server.',
+      message: 'Subscription found but the push failed, check the VAPID keys on the server.',
     }
   } catch {
     return {
       ok: false,
       subscriptions: 0,
       sent: 0,
-      message: 'Could not send a test push — is the Edge Function deployed?',
+      message: 'Could not send a test push, is the Edge Function deployed?',
     }
   }
 }

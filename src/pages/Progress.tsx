@@ -79,7 +79,7 @@ export default function Progress() {
       showToast('Logged 📈', '✅')
     } catch (e) {
       console.error(e)
-      showToast('Could not save — is the measurements setup run?', '⚠️')
+      showToast('Could not save, is the measurements setup run?', '⚠️')
     } finally {
       setSavingM(false)
     }
@@ -119,7 +119,7 @@ export default function Progress() {
       await load()
     } catch (err) {
       console.error(err)
-      showToast('Upload failed — check the storage setup and try again.', '⚠️')
+      showToast('Upload failed, check the storage setup and try again.', '⚠️')
     } finally {
       setUploading(false)
     }
@@ -145,7 +145,7 @@ export default function Progress() {
         <div>
           <h1>Progress</h1>
           <div className="muted" style={{ fontSize: 14 }}>
-            Before, during & after — see how far you’ve charged.
+            Before, during & after, see how far you’ve charged.
           </div>
         </div>
       </div>
@@ -200,7 +200,7 @@ export default function Progress() {
 
       {error && <div className="form-error">{error}</div>}
 
-      {/* Targets — set a goal value + date and track % */}
+      {/* Targets, set a goal value + date and track % */}
       {user && <Targets userId={user.id} />}
 
       {/* Measurements + chart */}
@@ -239,7 +239,7 @@ export default function Progress() {
       {loaded && photos.length === 0 && !error && (
         <div className="empty">
           <div className="empty-emoji">📸</div>
-          <p>No photos yet — add your first “before” shot above.</p>
+          <p>No photos yet, add your first “before” shot above.</p>
         </div>
       )}
 
@@ -316,7 +316,7 @@ function PhotoTile({
       <button
         className={`photo-share ${photo.shared_with_herd ? 'on' : ''}`}
         onClick={onToggleShare}
-        title={photo.shared_with_herd ? 'Shared with herd — tap to make private' : 'Share with herd'}
+        title={photo.shared_with_herd ? 'Shared with herd, tap to make private' : 'Share with herd'}
       >
         {photo.shared_with_herd ? '🤝' : '🔒'}
       </button>

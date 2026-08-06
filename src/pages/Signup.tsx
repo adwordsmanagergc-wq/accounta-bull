@@ -36,7 +36,7 @@ export default function Signup() {
     await requestNotificationPermission()
 
     if (!data.session) {
-      // Email confirmation is on — they must click the link before logging in.
+      // Email confirmation is on, they must click the link before logging in.
       setNote('Check your email to confirm your account, then log in.')
     }
     // If a session exists (confirmation off), AuthContext redirects to /today.
@@ -58,7 +58,7 @@ export default function Signup() {
     if (error) setError(error.message)
     else {
       await requestNotificationPermission()
-      setNote('Magic link sent — check your email to finish signing up.')
+      setNote('Magic link sent, check your email to finish signing up.')
     }
   }
 

@@ -10,7 +10,7 @@ const STEPS = [
   {
     emoji: '🎯',
     title: 'Set a goal',
-    body: 'Pick something you want to do — a workout, deep work, a walk — and choose the time and days it repeats.',
+    body: 'Pick something you want to do, a workout, deep work, a walk, and choose the time and days it repeats.',
   },
   {
     emoji: '⚡',
@@ -41,7 +41,7 @@ export default function Today() {
     if (!user) return
     setError(null)
     try {
-      // Goals are the critical fetch. Completions are non-critical — if that
+      // Goals are the critical fetch. Completions are non-critical, if that
       // query fails we still show the day (as if nothing is done yet).
       const g = await fetchGoals(user.id)
       setGoals(g)
@@ -103,7 +103,7 @@ export default function Today() {
       }))
       showToast(`+${goal.horn_value} horns! Total ${newTotal} 🏆`, '🐂')
     } catch (e) {
-      showToast('Could not save — try again.', '⚠️')
+      showToast('Could not save, try again.', '⚠️')
       console.error(e)
     } finally {
       setBusy(null)
@@ -147,7 +147,7 @@ export default function Today() {
             {firstName ? `Ready to charge, ${firstName}?` : 'Ready to charge?'}
           </h2>
           <p className="welcome-sub">
-            Nothing on your list for today yet — <strong>shall we add some tasks?</strong> Every
+            Nothing on your list for today yet, <strong>shall we add some tasks?</strong> Every
             strong day starts with one goal. 💪
           </p>
 
@@ -186,13 +186,13 @@ export default function Today() {
             >
               <div className="cb-kicker">⚡ CHARGE CALL</div>
               <div className="cb-title">{upcoming.title}</div>
-              <div style={{ fontSize: 14 }}>{whenLabel(upcoming)} — tap to get your boost</div>
+              <div style={{ fontSize: 14 }}>{whenLabel(upcoming)}, tap to get your boost</div>
             </div>
           )}
 
           <div className="today-summary">
             {doneToday === todays.length
-              ? `🔥 All ${todays.length} done today — you’re on fire!`
+              ? `🔥 All ${todays.length} done today, you’re on fire!`
               : `${doneToday} of ${todays.length} done today`}
           </div>
 
@@ -225,7 +225,7 @@ export default function Today() {
 
                   <div className="goal-actions">
                     {done ? (
-                      <span className="done-check">✓ Done — horns earned</span>
+                      <span className="done-check">✓ Done, horns earned</span>
                     ) : (
                       <>
                         <button

@@ -62,7 +62,7 @@ export default function Targets({ userId }: { userId: string }) {
       showToast('Target set 🎯', '✅')
       await load()
     } catch (e) {
-      showToast('Could not save — is the targets setup run?', '⚠️')
+      showToast('Could not save, is the targets setup run?', '⚠️')
       console.error(e)
     } finally {
       setBusy(false)

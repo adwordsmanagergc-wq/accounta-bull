@@ -94,7 +94,7 @@ export default function Herd() {
     try {
       setInviteCode(await createInvite(user.id))
     } catch (e) {
-      showToast('Could not create invite — try again.', '⚠️')
+      showToast('Could not create invite, try again.', '⚠️')
       console.error(e)
     } finally {
       setBusy(false)
@@ -538,7 +538,7 @@ function PartnerBlock({
       <div className="stack">
         {challenges.length === 0 && (
           <p className="faint" style={{ fontSize: 14, margin: '2px 2px 4px' }}>
-            No shared challenges yet — set one below.
+            No shared challenges yet, set one below.
           </p>
         )}
         {challenges.map((ch) => (
@@ -659,7 +659,7 @@ function ChallengeCard({
       showToast('Checked in! Keep charging 🐂', '✅')
       await onChanged()
     } catch (e) {
-      showToast('Could not check in — try again.', '⚠️')
+      showToast('Could not check in, try again.', '⚠️')
       console.error(e)
     } finally {
       setBusy(false)
@@ -721,8 +721,8 @@ function ChallengeCard({
       <div className="faint" style={{ fontSize: 12, marginTop: 8 }}>
         {ended
           ? leader === 'tie'
-            ? 'Finished — it’s a tie! 🤝'
-            : `Finished — ${leader === 'me' ? me.name : partnerName} won! 🎉`
+            ? 'Finished, it’s a tie! 🤝'
+            : `Finished, ${leader === 'me' ? me.name : partnerName} won! 🎉`
           : `Ends ${challenge.ends_on}`}
       </div>
 

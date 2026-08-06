@@ -47,7 +47,7 @@ export default function Rewards() {
       showToast(`Redeemed ${reward.title}! ${reward.emoji ?? '🎁'}`, '✅')
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : 'Could not redeem.'
-      showToast(msg.includes('enough') ? 'Not enough horns yet.' : 'Could not redeem — try again.', '⚠️')
+      showToast(msg.includes('enough') ? 'Not enough horns yet.' : 'Could not redeem, try again.', '⚠️')
       console.error(e)
     } finally {
       setBusy(null)

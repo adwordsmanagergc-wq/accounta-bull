@@ -68,7 +68,7 @@ async function updateProfileTotals(userId: string, hornDelta: number): Promise<n
 
 /**
  * Mark a goal complete. A committed completion (they pressed "I'M CHARGING")
- * still earns full horns — completing always earns `horn_value`.
+ * still earns full horns, completing always earns `horn_value`.
  * Returns the user's new horn total.
  */
 export async function completeGoal(

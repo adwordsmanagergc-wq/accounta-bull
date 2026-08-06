@@ -49,7 +49,7 @@ export default function Profile() {
       showToast('Profile picture updated 📸', '✅')
     } catch (err) {
       console.error(err)
-      showToast('Could not upload — make sure the storage setup has been run.', '⚠️')
+      showToast('Could not upload, make sure the storage setup has been run.', '⚠️')
     } finally {
       setUploading(false)
     }
@@ -63,14 +63,14 @@ export default function Profile() {
     const result = await enablePush(user.id)
     setPerm(notificationPermission())
     setBusy(false)
-    if (result === 'ok') showToast('Charge-call push on 🔔 — even when the app is closed', '⚡')
+    if (result === 'ok') showToast('Charge-call push on 🔔, even when the app is closed', '⚡')
     else if (result === 'denied')
-      showToast('Notifications blocked — enable them in your browser settings.', '🔕')
+      showToast('Notifications blocked, enable them in your browser settings.', '🔕')
     else if (result === 'unsupported')
       showToast('This browser can’t do push. On iPhone, add the app to your Home Screen first.', 'ℹ️')
     else if (result === 'unconfigured')
-      showToast('Push key not set yet — notifications work while the app is open.', 'ℹ️')
-    else showToast('Could not enable push — try again.', '⚠️')
+      showToast('Push key not set yet, notifications work while the app is open.', 'ℹ️')
+    else showToast('Could not enable push, try again.', '⚠️')
   }
 
   async function testNotification() {
@@ -120,7 +120,7 @@ export default function Profile() {
               value={bio}
               maxLength={160}
               onChange={(e) => setBio(e.target.value)}
-              placeholder="Your why — what are you charging toward?"
+              placeholder="Your why, what are you charging toward?"
             />
             <div className="row" style={{ gap: 8, justifyContent: 'center' }}>
               <button className="btn btn-primary btn-sm" disabled={busy} onClick={saveBio}>
@@ -175,8 +175,8 @@ export default function Profile() {
               <div className="muted" style={{ fontSize: 13 }}>
                 {perm === 'granted'
                   ? pushReady
-                    ? 'On — pushed 30 min before each goal, even when the app is closed.'
-                    : 'On — you’ll get a nudge 30 min before each goal while the app is open.'
+                    ? 'On, pushed 30 min before each goal, even when the app is closed.'
+                    : 'On, you’ll get a nudge 30 min before each goal while the app is open.'
                   : perm === 'denied'
                     ? 'Blocked in your browser settings.'
                     : 'Get a nudge 30 min before each goal.'}
