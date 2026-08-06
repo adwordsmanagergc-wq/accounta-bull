@@ -25,13 +25,23 @@ export default function Profile() {
     if (!user || next === tone) return
     setBusy(true)
     try {
-      const { error } = await supabase.from('profiles').update({ boost_tone: next }).eq('id', user.id)
+      // Read the row back so we can tell a real save from a silent no-op (e.g.
+      // PostgREST dropping the column when its schema cache is momentarily stale
+      // right after the column was added). A plain update returns success either
+      // way, so we verify the value actually changed.
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ boost_tone: next })
+        .eq('id', user.id)
+        .select('boost_tone')
+        .single()
       if (error) throw error
+      if (!data || data.boost_tone !== next) throw new Error('tone-not-persisted')
       await refreshProfile()
       showToast('Message tone updated', '✅')
     } catch (err) {
       console.error(err)
-      showToast('Could not save tone. Make sure the tone setup has been run in Supabase.', '⚠️')
+      showToast('Could not save tone yet, give it a moment and try again.', '⚠️')
     } finally {
       setBusy(false)
     }
