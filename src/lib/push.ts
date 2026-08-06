@@ -102,6 +102,33 @@ export async function sendTestPush(): Promise<TestPushResult> {
       body: { test: true },
     })
     if (error) {
+      // functions.invoke reports every non-2xx as an error. Pull the real HTTP
+      // status + body off the Response (FunctionsHttpError.context) so we show
+      // what actually went wrong instead of a misleading "couldn't reach".
+      const ctx = (error as { context?: Response }).context
+      if (ctx && typeof ctx.status === 'number') {
+        let body = ''
+        try {
+          body = (await ctx.clone().text()).slice(0, 200)
+        } catch {
+          /* body not readable */
+        }
+        console.warn('send-push returned', ctx.status, body)
+        if (ctx.status === 401) {
+          return {
+            ok: false,
+            subscriptions: 0,
+            sent: 0,
+            message: 'Push server didn’t recognise your login (401). Log out and back in, then retry.',
+          }
+        }
+        return {
+          ok: false,
+          subscriptions: 0,
+          sent: 0,
+          message: `Push server returned ${ctx.status}. ${body}`.trim(),
+        }
+      }
       return {
         ok: false,
         subscriptions: 0,
