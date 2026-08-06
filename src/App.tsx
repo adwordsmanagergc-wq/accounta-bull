@@ -11,6 +11,7 @@ import Boost from './pages/Boost'
 import Profile from './pages/Profile'
 import Herd from './pages/Herd'
 import Progress from './pages/Progress'
+import Rewards from './pages/Rewards'
 
 function Loading() {
   return (
@@ -37,6 +38,7 @@ function AppLayout() {
         <Route path="/boost/:id" element={<Boost />} />
         <Route path="/herd" element={<Herd />} />
         <Route path="/progress" element={<Progress />} />
+        <Route path="/rewards" element={<Rewards />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="*" element={<Navigate to="/today" replace />} />
       </Routes>

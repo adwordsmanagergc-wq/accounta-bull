@@ -31,3 +31,23 @@ export async function deleteProgressPhoto(photo: ProgressPhoto): Promise<void> {
   if (error) throw error
   await removeProgressFile(photo.storage_path).catch(() => {})
 }
+
+export async function setPhotoShared(photoId: string, shared: boolean): Promise<void> {
+  const { error } = await supabase
+    .from('progress_photos')
+    .update({ shared_with_herd: shared })
+    .eq('id', photoId)
+  if (error) throw error
+}
+
+/** Progress photos your herd-mates have shared with you. */
+export async function fetchHerdSharedPhotos(): Promise<ProgressPhoto[]> {
+  const { data, error } = await supabase
+    .from('progress_photos')
+    .select('*')
+    .eq('shared_with_herd', true)
+    .order('taken_on', { ascending: false })
+  if (error) throw error
+  // RLS returns your own + herd-mates' shared; drop your own for the herd view.
+  return (data as ProgressPhoto[]) ?? []
+}

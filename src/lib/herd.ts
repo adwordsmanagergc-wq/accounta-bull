@@ -133,6 +133,32 @@ export async function fetchCheckins(challengeIds: string[]): Promise<ChallengeCh
   return (data as ChallengeCheckin[]) ?? []
 }
 
+export interface Cheer {
+  id: string
+  challenge_id: string
+  user_id: string
+  emoji: string
+  created_at: string
+}
+
+export async function fetchCheers(challengeIds: string[]): Promise<Cheer[]> {
+  if (challengeIds.length === 0) return []
+  const { data, error } = await supabase
+    .from('challenge_cheers')
+    .select('*')
+    .in('challenge_id', challengeIds)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data as Cheer[]) ?? []
+}
+
+export async function addCheer(userId: string, challengeId: string, emoji: string): Promise<void> {
+  const { error } = await supabase
+    .from('challenge_cheers')
+    .insert({ user_id: userId, challenge_id: challengeId, emoji })
+  if (error) throw error
+}
+
 /** Check in for today on a shared challenge (idempotent per day). */
 export async function checkinToday(userId: string, challengeId: string): Promise<void> {
   const { error } = await supabase

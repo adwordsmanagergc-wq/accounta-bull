@@ -14,9 +14,14 @@ import {
   fetchCheckins,
   fetchPartners,
   updateHerd,
+  fetchCheers,
+  addCheer,
+  type Cheer,
 } from '../lib/herd'
 import { uploadHerdPhoto } from '../lib/storage'
-import type { ChallengeCheckin, HerdPartner, SharedChallenge } from '../lib/types'
+import { fetchHerdSharedPhotos } from '../lib/progress'
+import { signedProgressUrl } from '../lib/storage'
+import type { ChallengeCheckin, HerdPartner, ProgressPhoto, SharedChallenge } from '../lib/types'
 
 export default function Herd() {
   const { user, profile } = useAuth()
@@ -26,6 +31,8 @@ export default function Herd() {
   const [partners, setPartners] = useState<HerdPartner[]>([])
   const [challenges, setChallenges] = useState<SharedChallenge[]>([])
   const [checkins, setCheckins] = useState<ChallengeCheckin[]>([])
+  const [cheers, setCheers] = useState<Cheer[]>([])
+  const [sharedPhotos, setSharedPhotos] = useState<ProgressPhoto[]>([])
   const [loaded, setLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -46,10 +53,17 @@ export default function Herd() {
           await Promise.all(ps.map((p) => fetchChallenges(p.connectionId)))
         ).flat()
         setChallenges(allChallenges)
-        setCheckins(await fetchCheckins(allChallenges.map((c) => c.id)))
+        const ids = allChallenges.map((c) => c.id)
+        setCheckins(await fetchCheckins(ids))
+        setCheers(await fetchCheers(ids).catch(() => []))
+        // Partner-shared progress photos (RLS returns shared ones; drop my own).
+        const shared = await fetchHerdSharedPhotos().catch(() => [])
+        setSharedPhotos(shared.filter((p) => p.user_id !== user.id))
       } else {
         setChallenges([])
         setCheckins([])
+        setCheers([])
+        setSharedPhotos([])
       }
     } catch (e) {
       console.error(e)
@@ -191,9 +205,56 @@ export default function Herd() {
           me={{ id: user!.id, name: myName, horns: profile?.horns ?? 0, streak: profile?.streak ?? 0 }}
           challenges={challenges.filter((c) => c.connection_id === partner.connectionId)}
           checkins={checkins}
+          cheers={cheers}
+          onCheer={cheer}
           onChanged={load}
         />
       ))}
+
+      {sharedPhotos.length > 0 && (
+        <div style={{ marginTop: 6 }}>
+          <div className="steps-heading" style={{ margin: '0 0 10px' }}>
+            📸 Shared by your herd
+          </div>
+          <div className="photo-grid">
+            {sharedPhotos.map((p) => (
+              <SharedPhoto key={p.id} photo={p} />
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
+  async function cheer(challengeId: string, emoji: string) {
+    if (!user) return
+    setCheers((c) => [
+      { id: `local-${Date.now()}`, challenge_id: challengeId, user_id: user.id, emoji, created_at: '' },
+      ...c,
+    ])
+    try {
+      await addCheer(user.id, challengeId, emoji)
+    } catch (e) {
+      console.error(e)
+    }
+  }
+}
+
+function SharedPhoto({ photo }: { photo: ProgressPhoto }) {
+  const [url, setUrl] = useState<string | null>(null)
+  useEffect(() => {
+    let ok = true
+    signedProgressUrl(photo.storage_path).then((u) => ok && setUrl(u))
+    return () => {
+      ok = false
+    }
+  }, [photo.storage_path])
+  return (
+    <div className="photo-tile">
+      {url ? <img src={url} alt="shared progress" /> : <div className="photo-skeleton" />}
+      <div className="photo-meta">
+        <span>{photo.taken_on}</span>
+      </div>
     </div>
   )
 }
@@ -205,12 +266,16 @@ function PartnerBlock({
   me,
   challenges,
   checkins,
+  cheers,
+  onCheer,
   onChanged,
 }: {
   partner: HerdPartner
   me: { id: string; name: string; horns: number; streak: number }
   challenges: SharedChallenge[]
   checkins: ChallengeCheckin[]
+  cheers: Cheer[]
+  onCheer: (challengeId: string, emoji: string) => void
   onChanged: () => void | Promise<void>
 }) {
   const { showToast } = useToast()
@@ -375,6 +440,8 @@ function PartnerBlock({
             key={ch.id}
             challenge={ch}
             checkins={checkins.filter((c) => c.challenge_id === ch.id)}
+            cheers={cheers.filter((c) => c.challenge_id === ch.id)}
+            onCheer={(emoji) => onCheer(ch.id, emoji)}
             me={me}
             partner={partner}
             onChanged={onChanged}
@@ -453,12 +520,16 @@ function PartnerBlock({
 function ChallengeCard({
   challenge,
   checkins,
+  cheers,
+  onCheer,
   me,
   partner,
   onChanged,
 }: {
   challenge: SharedChallenge
   checkins: ChallengeCheckin[]
+  cheers: Cheer[]
+  onCheer: (emoji: string) => void
   me: { id: string; name: string }
   partner: HerdPartner
   onChanged: () => void | Promise<void>
@@ -559,6 +630,19 @@ function ChallengeCard({
           {checkedInToday ? '✓ Checked in today' : '✓ I did it today'}
         </button>
       )}
+
+      {/* Cheers */}
+      <div className="cheer-row">
+        {cheers.length > 0 && (
+          <span className="cheer-tally">{cheers.map((c) => c.emoji).slice(0, 12).join(' ')}</span>
+        )}
+        <span className="cheer-spacer" />
+        {['🔥', '💪', '👏', '🐂'].map((e) => (
+          <button key={e} className="cheer-btn" onClick={() => onCheer(e)} title="Cheer">
+            {e}
+          </button>
+        ))}
+      </div>
     </div>
   )
 }

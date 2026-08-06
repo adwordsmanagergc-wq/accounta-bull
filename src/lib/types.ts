@@ -40,6 +40,7 @@ export interface ProgressPhoto {
   storage_path: string
   taken_on: string
   note: string | null
+  shared_with_herd: boolean
   created_at: string
 }
 

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import Avatar from '../components/Avatar'
+import Achievements from '../components/Achievements'
 import { notificationPermission, notificationsSupported } from '../lib/notify'
 import { enablePush, pushConfigured, pushSupported, sendTestPush } from '../lib/push'
 import { uploadAvatar } from '../lib/storage'
@@ -15,6 +16,25 @@ export default function Profile() {
   const [busy, setBusy] = useState(false)
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
+  const [editingBio, setEditingBio] = useState(false)
+  const [bio, setBio] = useState(profile?.bio ?? '')
+
+  async function saveBio() {
+    if (!user) return
+    setBusy(true)
+    try {
+      const { error } = await supabase.from('profiles').update({ bio: bio.trim() || null }).eq('id', user.id)
+      if (error) throw error
+      await refreshProfile()
+      setEditingBio(false)
+      showToast('Bio saved', '✅')
+    } catch (err) {
+      console.error(err)
+      showToast('Could not save bio.', '⚠️')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   async function onPickAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -91,16 +111,50 @@ export default function Profile() {
         <div className="muted" style={{ fontSize: 14 }}>
           {user?.email}
         </div>
-        {profile?.bio && (
-          <div className="muted" style={{ fontSize: 14, marginTop: 8 }}>
-            {profile.bio}
+
+        {editingBio ? (
+          <div className="stack" style={{ marginTop: 12, textAlign: 'left' }}>
+            <textarea
+              className="input"
+              rows={2}
+              value={bio}
+              maxLength={160}
+              onChange={(e) => setBio(e.target.value)}
+              placeholder="Your why — what are you charging toward?"
+            />
+            <div className="row" style={{ gap: 8, justifyContent: 'center' }}>
+              <button className="btn btn-primary btn-sm" disabled={busy} onClick={saveBio}>
+                Save
+              </button>
+              <button className="btn btn-ghost btn-sm" onClick={() => setEditingBio(false)}>
+                Cancel
+              </button>
+            </div>
           </div>
+        ) : (
+          <button
+            className="link-btn"
+            style={{ margin: '10px auto 0', fontSize: 14 }}
+            onClick={() => {
+              setBio(profile?.bio ?? '')
+              setEditingBio(true)
+            }}
+          >
+            {profile?.bio ? profile.bio : '＋ Add a short bio'}
+          </button>
         )}
       </div>
 
-      <Link to="/progress" className="btn btn-ghost" style={{ marginBottom: 16 }}>
-        📸 Progress photos
-      </Link>
+      {user && <Achievements userId={user.id} horns={profile?.horns ?? 0} streak={profile?.streak ?? 0} />}
+
+      <div className="row" style={{ gap: 10, marginBottom: 16 }}>
+        <Link to="/progress" className="btn btn-ghost" style={{ flex: 1 }}>
+          📸 Progress
+        </Link>
+        <Link to="/rewards" className="btn btn-ghost" style={{ flex: 1 }}>
+          🎁 Rewards
+        </Link>
+      </div>
 
       <div className="stat-grid" style={{ marginBottom: 16 }}>
         <div className="card stat">

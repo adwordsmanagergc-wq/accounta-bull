@@ -1058,3 +1058,122 @@ select {
 .herd-rules strong {
   color: var(--gold);
 }
+
+/* ---------- Achievements ---------- */
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.badge {
+  text-align: center;
+  opacity: 0.35;
+  filter: grayscale(1);
+}
+.badge.on {
+  opacity: 1;
+  filter: none;
+}
+.badge-emoji {
+  font-size: 24px;
+}
+.badge-title {
+  font-size: 9.5px;
+  color: var(--text-dim);
+  margin-top: 2px;
+  line-height: 1.1;
+}
+
+/* ---------- Rewards ---------- */
+.reward-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+}
+.reward-emoji {
+  font-size: 30px;
+  flex: 0 0 auto;
+}
+.reward-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+.reward-cost {
+  font-weight: 700;
+  color: var(--gold);
+  font-size: 14px;
+}
+
+/* ---------- Photo share toggle + compare ---------- */
+.photo-share {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(10, 22, 40, 0.7);
+  font-size: 13px;
+}
+.photo-share.on {
+  background: rgba(245, 130, 31, 0.85);
+}
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.compare-pane {
+  text-align: center;
+}
+.compare-pane img {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+}
+.compare-pane .photo-skeleton {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: 12px;
+}
+.compare-label {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--gold);
+  margin-bottom: 6px;
+}
+
+/* ---------- Cheers ---------- */
+.cheer-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+}
+.cheer-spacer {
+  flex: 1;
+}
+.cheer-tally {
+  font-size: 15px;
+  letter-spacing: 1px;
+}
+.cheer-btn {
+  border: 1px solid var(--border-strong);
+  background: rgba(10, 22, 40, 0.5);
+  border-radius: 999px;
+  width: 34px;
+  height: 34px;
+  font-size: 16px;
+  padding: 0;
+}
+.cheer-btn:active {
+  background: rgba(245, 130, 31, 0.2);
+}
