@@ -3,7 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { fetchGoals } from '../lib/api'
-import { loadBoostMessages, pickBoost } from '../lib/boost'
+import {
+  loadBoostMessages,
+  loadPersonalBoosts,
+  markPersonalUsed,
+  pickBoost,
+  type PersonalBoost,
+} from '../lib/boost'
 import { setCommitted, whenLabel } from '../lib/game'
 import type { BoostMessage, Goal } from '../lib/types'
 
@@ -15,17 +21,38 @@ export default function Boost() {
 
   const [goal, setGoal] = useState<Goal | null>(null)
   const [messages, setMessages] = useState<BoostMessage[]>([])
-  const [current, setCurrent] = useState<BoostMessage | null>(null)
+  const [personal, setPersonal] = useState<PersonalBoost[]>([])
+  const [text, setText] = useState<string>('')
+  const [avoidId, setAvoidId] = useState<number | undefined>(undefined)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!user || !id) return
-    Promise.all([fetchGoals(user.id), loadBoostMessages()])
-      .then(([goals, msgs]) => {
+    const uid = user.id
+    fetchGoals(uid)
+      .then(async (goals) => {
         const g = goals.find((x) => x.id === id) ?? null
         setGoal(g)
+        if (!g) {
+          setLoading(false)
+          return
+        }
+        // Prefer a personalized line if one is ready; fall back to the library.
+        const [msgs, mine] = await Promise.all([
+          loadBoostMessages(),
+          loadPersonalBoosts(uid, g.category),
+        ])
         setMessages(msgs)
-        if (g) setCurrent(pickBoost(msgs, g.category))
+        if (mine.length) {
+          const [head, ...rest] = mine
+          setPersonal(rest)
+          setText(head.text)
+          markPersonalUsed(head.id)
+        } else {
+          const m = pickBoost(msgs, g.category)
+          setText(m?.text ?? 'Show up. That’s the whole game.')
+          setAvoidId(m?.id)
+        }
         setLoading(false)
       })
       .catch(() => setLoading(false))
@@ -34,7 +61,17 @@ export default function Boost() {
 
   function another() {
     if (!goal) return
-    setCurrent(pickBoost(messages, goal.category, current?.id))
+    // Use up any remaining personalized lines first, then cycle the library.
+    if (personal.length) {
+      const [head, ...rest] = personal
+      setPersonal(rest)
+      setText(head.text)
+      markPersonalUsed(head.id)
+      return
+    }
+    const m = pickBoost(messages, goal.category, avoidId)
+    setText(m?.text ?? 'Show up. That’s the whole game.')
+    setAvoidId(m?.id)
   }
 
   function commit() {
@@ -67,7 +104,7 @@ export default function Boost() {
         </div>
       </div>
 
-      <div className="boost-quote">“{current?.text ?? 'Show up. That’s the whole game.'}”</div>
+      <div className="boost-quote">“{text || 'Show up. That’s the whole game.'}”</div>
 
       <div className="stack">
         <button className="btn btn-primary" onClick={commit}>

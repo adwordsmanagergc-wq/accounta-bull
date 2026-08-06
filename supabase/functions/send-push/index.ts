@@ -141,10 +141,34 @@ Deno.serve(async (req) => {
   for (const p of profiles ?? []) tzOf.set(p.id as string, (p.timezone as string) || 'UTC')
 
   const msgs = messages ?? []
-  const pickBoost = (category: string) => {
+  const pickStatic = (category: string) => {
     const pool = msgs.filter((m) => m.category === category || m.category === 'general')
     const from = pool.length ? pool : msgs
     return from.length ? from[Math.floor(Math.random() * from.length)].text : 'Time to charge.'
+  }
+
+  // Prefer an AI-personalized line for this user, marking it used so it isn't
+  // repeated. Falls back to the shared static library. The boost_pool table may
+  // not exist yet (older setups), so any error here is non-fatal.
+  const pickBoost = async (userId: string, category: string) => {
+    try {
+      const { data } = await supabase
+        .from('boost_pool')
+        .select('id, text')
+        .eq('user_id', userId)
+        .is('used_at', null)
+        .or(`category.eq.${category},category.eq.general`)
+        .order('created_at', { ascending: true })
+        .limit(1)
+      const line = (data as { id: string; text: string }[] | null)?.[0]
+      if (line) {
+        await supabase.from('boost_pool').update({ used_at: new Date().toISOString() }).eq('id', line.id)
+        return line.text
+      }
+    } catch (err) {
+      console.error('boost_pool lookup failed', err)
+    }
+    return pickStatic(category)
   }
 
   // Which goals are entering the 30-minute window right now (per user tz)?
@@ -173,9 +197,10 @@ Deno.serve(async (req) => {
       .select('*')
       .eq('user_id', goal.user_id)
 
+    const boost = await pickBoost(goal.user_id, goal.category)
     const payload = JSON.stringify({
       title: '⚡ Charge Call',
-      body: `"${goal.title}" starts in ${LEAD_MIN} min. ${pickBoost(goal.category)}`,
+      body: `"${goal.title}" starts in ${LEAD_MIN} min. ${boost}`,
       url: '/',
       tag: `charge-${goal.id}-${dateKey}`,
       icon: '/icon-192.png',

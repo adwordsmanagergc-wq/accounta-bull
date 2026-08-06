@@ -12,6 +12,41 @@ export async function loadBoostMessages(): Promise<BoostMessage[]> {
   return cache
 }
 
+export interface PersonalBoost {
+  id: string
+  category: Category | 'general'
+  text: string
+}
+
+/**
+ * Unused AI-personalized lines for this user + category (plus general ones),
+ * oldest first. Non-fatal: returns [] if the boost_pool table isn't set up yet.
+ */
+export async function loadPersonalBoosts(
+  userId: string,
+  category: Category
+): Promise<PersonalBoost[]> {
+  const { data, error } = await supabase
+    .from('boost_pool')
+    .select('id, category, text')
+    .eq('user_id', userId)
+    .is('used_at', null)
+    .or(`category.eq.${category},category.eq.general`)
+    .order('created_at', { ascending: true })
+    .limit(20)
+  if (error) return []
+  return (data as PersonalBoost[]) ?? []
+}
+
+/** Mark a personalized line as used so it isn't shown again. Best-effort. */
+export async function markPersonalUsed(id: string): Promise<void> {
+  try {
+    await supabase.from('boost_pool').update({ used_at: new Date().toISOString() }).eq('id', id)
+  } catch {
+    /* non-fatal */
+  }
+}
+
 /** A random message for the category, falling back to general messages. */
 export function pickBoost(
   messages: BoostMessage[],
