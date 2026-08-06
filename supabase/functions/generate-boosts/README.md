@@ -2,7 +2,9 @@
 
 Tops up a per-user pool of **AI-personalized** charge-call lines using Claude
 Haiku (the cheapest Claude model). Lines are written from each user's name, bio,
-current streak, and active goals, then stored in `public.boost_pool`.
+current streak, active goals, and their chosen **tone** (`soft`, `medium`, or
+`savage`), then stored in `public.boost_pool`. When a user changes tone, the pool
+refills in the new voice automatically.
 
 The app (`src/pages/Boost.tsx`) and the push sender (`send-push`) both pull an
 **unused personal line first** and fall back to the shared `boost_messages`
@@ -18,7 +20,7 @@ runs generate nothing.
 
 ## Prerequisites
 
-1. Run migration `supabase/migrations/0009_boost_pool.sql` in the SQL editor.
+1. Run migrations `0009_boost_pool.sql` and `0010_boost_tone.sql` in the SQL editor.
 2. Have an Anthropic API key. **If a key was ever pasted into a chat, revoke it
    in the Anthropic console and create a new one first.** The key lives ONLY as
    a function secret, never in the repo, the frontend, or Vercel.

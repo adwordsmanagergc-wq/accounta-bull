@@ -36,32 +36,63 @@ const json = (body: unknown, status = 200) =>
     headers: { ...CORS, 'Content-Type': 'application/json' },
   })
 
-type Profile = { id: string; name: string | null; bio: string | null; streak: number }
+type Tone = 'soft' | 'medium' | 'savage'
+type Profile = {
+  id: string
+  name: string | null
+  bio: string | null
+  streak: number
+  boost_tone: Tone | null
+}
 type Goal = { user_id: string; title: string; category: string }
 type Line = { category: string; text: string }
 
-const SYSTEM = [
-  'You write short motivational "charge call" lines for Accounta-Bull, a daily',
-  'accountability app with a friendly bull mascot. Each line is shown right before',
-  'a user starts one of their goals, to give them a psychological push to begin.',
-  '',
-  'Voice: warm, direct, a little cheeky, never cheesy or corporate. Second person',
-  '("you"). One or two short sentences, ideally under 120 characters. You may use',
-  "the person's first name occasionally, but not in every line. Bull and \"charge\"",
-  'imagery is welcome but do not overuse it.',
-  '',
-  'Hard rules:',
-  '- Never use em dashes. Use commas, periods, or short sentences instead.',
-  '- No hashtags, no emoji, no quotation marks around the line.',
-  '- Do not invent facts about the person beyond what you are told.',
-  '- Keep it encouraging and safe; no health, medical, or weight-shaming claims.',
-].join('\n')
+const TONE_GUIDE: Record<Tone, string> = {
+  soft: [
+    'Tone: SOFT AND NICE. Gentle, warm, reassuring encouragement. No pressure, no',
+    'guilt. Think of a kind friend who believes in them. No swearing.',
+  ].join('\n'),
+  medium: [
+    'Tone: MEDIUM PUSHY. Direct, confident, motivating. A firm nudge with a bit of',
+    'cheek, like a good coach. Not soft, not crude. No swearing.',
+  ].join('\n'),
+  savage: [
+    'Tone: RUDE AND PUSHY, WITH SWEARING. Brash, in your face, trash-talking gym-bro',
+    'energy. Swearing is expected and encouraged (shit, damn, ass, hell, fuck, etc.).',
+    'Roast their excuses, dare them to move. The user explicitly opted into this, so',
+    'do not hold back on the attitude. BUT never cross these lines: no slurs, no',
+    'hate, no attacks on protected characteristics (race, gender, religion, etc.), no',
+    'body-shaming, no sexual content, and nothing about self-harm. Swear AT the',
+    'excuse and the laziness, never demean the person for who they are.',
+  ].join('\n'),
+}
+
+function systemFor(tone: Tone): string {
+  return [
+    'You write short motivational "charge call" lines for Accounta-Bull, a daily',
+    'accountability app with a friendly bull mascot. Each line is shown right before',
+    'a user starts one of their goals, to give them a psychological push to begin.',
+    '',
+    'Voice: second person ("you"). One or two short sentences, ideally under 120',
+    "characters. You may use the person's first name occasionally, but not in every",
+    'line. Bull and "charge" imagery is welcome but do not overuse it.',
+    '',
+    TONE_GUIDE[tone],
+    '',
+    'Hard rules (all tones):',
+    '- Never use em dashes. Use commas, periods, or short sentences instead.',
+    '- No hashtags, no emoji, no quotation marks around the line.',
+    '- Do not invent facts about the person beyond what you are told.',
+    '- No medical or weight claims.',
+  ].join('\n')
+}
 
 /** Ask Claude for a batch of personalized lines. Returns [] on any failure. */
 async function generateForUser(
   profile: Profile,
   goals: Goal[],
-  count: number
+  count: number,
+  tone: Tone
 ): Promise<Line[]> {
   const name = (profile.name ?? '').trim()
   const cats = Array.from(new Set(goals.map((g) => g.category)))
@@ -97,7 +128,7 @@ async function generateForUser(
       body: JSON.stringify({
         model: MODEL,
         max_tokens: 1024,
-        system: SYSTEM,
+        system: systemFor(tone),
         messages: [{ role: 'user', content: userPrompt }],
       }),
     })
@@ -151,11 +182,11 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
   )
 
-  // Pull profiles, their active goals, and how many unused lines each already has.
+  // Pull profiles, their active goals, and their unused lines (with tone).
   const [{ data: profiles }, { data: goals }, { data: pool }] = await Promise.all([
-    supabase.from('profiles').select('id, name, bio, streak'),
+    supabase.from('profiles').select('id, name, bio, streak, boost_tone'),
     supabase.from('goals').select('user_id, title, category').eq('active', true),
-    supabase.from('boost_pool').select('user_id').is('used_at', null),
+    supabase.from('boost_pool').select('user_id, tone').is('used_at', null),
   ])
 
   const goalsByUser = new Map<string, Goal[]>()
@@ -165,12 +196,20 @@ Deno.serve(async (req) => {
     goalsByUser.set(g.user_id, arr)
   }
 
+  // Count unused lines per user, but only those matching that user's CURRENT tone,
+  // so a tone switch triggers a fresh refill in the new voice.
+  const toneOf = (p: Profile): Tone => (p.boost_tone ?? 'medium') as Tone
+  const wantedTone = new Map<string, Tone>()
+  for (const p of (profiles as Profile[]) ?? []) wantedTone.set(p.id, toneOf(p))
+
   const unusedCount = new Map<string, number>()
-  for (const row of (pool as { user_id: string }[]) ?? []) {
+  for (const row of (pool as { user_id: string; tone: string }[]) ?? []) {
+    if (row.tone !== (wantedTone.get(row.user_id) ?? 'medium')) continue
     unusedCount.set(row.user_id, (unusedCount.get(row.user_id) ?? 0) + 1)
   }
 
-  // Only bother with users who have at least one active goal and are running low.
+  // Only bother with users who have at least one active goal and are running low
+  // on lines in their current tone.
   const needsRefill = ((profiles as Profile[]) ?? [])
     .filter((p) => (goalsByUser.get(p.id)?.length ?? 0) > 0)
     .filter((p) => (unusedCount.get(p.id) ?? 0) < MIN_UNUSED)
@@ -179,10 +218,11 @@ Deno.serve(async (req) => {
   let usersFilled = 0
   let linesAdded = 0
   for (const profile of needsRefill) {
+    const tone = toneOf(profile)
     const want = TARGET - (unusedCount.get(profile.id) ?? 0)
-    const lines = await generateForUser(profile, goalsByUser.get(profile.id) ?? [], want)
+    const lines = await generateForUser(profile, goalsByUser.get(profile.id) ?? [], want, tone)
     if (!lines.length) continue
-    const rows = lines.map((l) => ({ user_id: profile.id, category: l.category, text: l.text }))
+    const rows = lines.map((l) => ({ user_id: profile.id, category: l.category, text: l.text, tone }))
     const { error } = await supabase.from('boost_pool').insert(rows)
     if (error) {
       console.error('insert failed for', profile.id, error.message)

@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { BoostMessage, Category } from './types'
+import type { BoostMessage, BoostTone, Category } from './types'
 
 // Small in-memory cache so cycling "Another boost" is instant.
 let cache: BoostMessage[] | null = null
@@ -24,12 +24,14 @@ export interface PersonalBoost {
  */
 export async function loadPersonalBoosts(
   userId: string,
-  category: Category
+  category: Category,
+  tone: BoostTone = 'medium'
 ): Promise<PersonalBoost[]> {
   const { data, error } = await supabase
     .from('boost_pool')
     .select('id, category, text')
     .eq('user_id', userId)
+    .eq('tone', tone)
     .is('used_at', null)
     .or(`category.eq.${category},category.eq.general`)
     .order('created_at', { ascending: true })

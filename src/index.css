@@ -1246,3 +1246,52 @@ select {
   padding: 2px 8px;
   font-size: 12px;
 }
+
+/* Message tone selector (Profile) */
+.tone-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--navy-600);
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.tone-option:hover:not(:disabled) {
+  border-color: var(--border-strong);
+}
+.tone-option:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.tone-active {
+  border-color: var(--orange);
+  background: linear-gradient(180deg, var(--card-2) 0%, var(--card) 100%);
+}
+.tone-emoji {
+  font-size: 22px;
+  line-height: 1;
+}
+.tone-text {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+.tone-label {
+  font-weight: 700;
+}
+.tone-hint {
+  font-size: 12px;
+}
+.tone-check {
+  color: var(--orange);
+  font-weight: 800;
+  width: 16px;
+  text-align: center;
+}

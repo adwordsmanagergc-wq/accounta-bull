@@ -133,12 +133,16 @@ Deno.serve(async (req) => {
 
   const [{ data: goals }, { data: profiles }, { data: messages }] = await Promise.all([
     supabase.from('goals').select('*').eq('active', true),
-    supabase.from('profiles').select('id, timezone'),
+    supabase.from('profiles').select('id, timezone, boost_tone'),
     supabase.from('boost_messages').select('category, text'),
   ])
 
   const tzOf = new Map<string, string>()
-  for (const p of profiles ?? []) tzOf.set(p.id as string, (p.timezone as string) || 'UTC')
+  const toneOf = new Map<string, string>()
+  for (const p of profiles ?? []) {
+    tzOf.set(p.id as string, (p.timezone as string) || 'UTC')
+    toneOf.set(p.id as string, (p.boost_tone as string) || 'medium')
+  }
 
   const msgs = messages ?? []
   const pickStatic = (category: string) => {
@@ -156,6 +160,7 @@ Deno.serve(async (req) => {
         .from('boost_pool')
         .select('id, text')
         .eq('user_id', userId)
+        .eq('tone', toneOf.get(userId) ?? 'medium')
         .is('used_at', null)
         .or(`category.eq.${category},category.eq.general`)
         .order('created_at', { ascending: true })

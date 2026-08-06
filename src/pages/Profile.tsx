@@ -8,6 +8,7 @@ import { notificationPermission, notificationsSupported } from '../lib/notify'
 import { enablePush, pushConfigured, pushSupported, sendTestPush } from '../lib/push'
 import { uploadAvatar } from '../lib/storage'
 import { supabase } from '../lib/supabase'
+import { TONES, type BoostTone } from '../lib/types'
 
 export default function Profile() {
   const { user, profile, signOut, refreshProfile } = useAuth()
@@ -18,6 +19,23 @@ export default function Profile() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [editingBio, setEditingBio] = useState(false)
   const [bio, setBio] = useState(profile?.bio ?? '')
+  const tone: BoostTone = profile?.boost_tone ?? 'medium'
+
+  async function saveTone(next: BoostTone) {
+    if (!user || next === tone) return
+    setBusy(true)
+    try {
+      const { error } = await supabase.from('profiles').update({ boost_tone: next }).eq('id', user.id)
+      if (error) throw error
+      await refreshProfile()
+      showToast('Message tone updated', '✅')
+    } catch (err) {
+      console.error(err)
+      showToast('Could not save tone. Make sure the tone setup has been run in Supabase.', '⚠️')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   async function saveBio() {
     if (!user) return
@@ -200,6 +218,38 @@ export default function Profile() {
           )}
         </div>
       )}
+
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div style={{ fontWeight: 700 }}>Message tone</div>
+        <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
+          How your charge calls and boosts sound to you.
+        </div>
+        <div className="stack" style={{ gap: 8 }}>
+          {TONES.map((t) => {
+            const active = tone === t.value
+            return (
+              <button
+                key={t.value}
+                className={`tone-option${active ? ' tone-active' : ''}`}
+                disabled={busy}
+                onClick={() => saveTone(t.value)}
+              >
+                <span className="tone-emoji">{t.emoji}</span>
+                <span className="tone-text">
+                  <span className="tone-label">{t.label}</span>
+                  <span className="tone-hint muted">{t.hint}</span>
+                </span>
+                <span className="tone-check">{active ? '✓' : ''}</span>
+              </button>
+            )
+          })}
+        </div>
+        {tone === 'savage' && (
+          <div className="muted" style={{ fontSize: 12, marginTop: 10 }}>
+            Heads up: this one gets crude and swears. You asked for it. 🐂
+          </div>
+        )}
+      </div>
 
       <button className="btn btn-danger" onClick={signOut}>
         Log out

@@ -12,6 +12,14 @@ export const CATEGORIES: { value: Category; label: string; emoji: string }[] = [
 // 0 = Sunday ... 6 = Saturday (matches JS Date.getDay()).
 export const DAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
+export type BoostTone = 'soft' | 'medium' | 'savage'
+
+export const TONES: { value: BoostTone; label: string; emoji: string; hint: string }[] = [
+  { value: 'soft', label: 'Soft and nice', emoji: '🌤️', hint: 'Gentle, kind encouragement.' },
+  { value: 'medium', label: 'Medium pushy', emoji: '💪', hint: 'A firm, confident nudge.' },
+  { value: 'savage', label: 'Rude and pushy', emoji: '🤬', hint: 'In your face, with swearing.' },
+]
+
 export interface Profile {
   id: string
   name: string | null
@@ -22,6 +30,7 @@ export interface Profile {
   timezone: string | null
   avatar_url: string | null
   bio: string | null
+  boost_tone: BoostTone | null
   created_at: string
 }
 

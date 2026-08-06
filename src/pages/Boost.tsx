@@ -15,7 +15,7 @@ import type { BoostMessage, Goal } from '../lib/types'
 
 export default function Boost() {
   const { id } = useParams()
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const { showToast } = useToast()
   const navigate = useNavigate()
 
@@ -40,7 +40,7 @@ export default function Boost() {
         // Prefer a personalized line if one is ready; fall back to the library.
         const [msgs, mine] = await Promise.all([
           loadBoostMessages(),
-          loadPersonalBoosts(uid, g.category),
+          loadPersonalBoosts(uid, g.category, profile?.boost_tone ?? 'medium'),
         ])
         setMessages(msgs)
         if (mine.length) {
