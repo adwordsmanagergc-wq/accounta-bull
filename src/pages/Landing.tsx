@@ -3,9 +3,9 @@ import Logo from '../components/Logo'
 
 const features = [
   {
-    icon: '🚩',
-    title: 'Charge Calls',
-    body: 'A boost 30 minutes before every goal — a push, not a nag.',
+    icon: '',
+    title: 'Positive Pushes',
+    body: '',
     video: `${import.meta.env.BASE_URL}chargecalls-bg.mp4`,
     poster: `${import.meta.env.BASE_URL}chargecalls-bg.jpg`,
   },
@@ -59,10 +59,10 @@ export default function Landing() {
                 <span className="feature-video-scrim" />
               </>
             )}
-            <span className="feature-icon">{f.icon}</span>
+            {f.icon && <span className="feature-icon">{f.icon}</span>}
             <div>
               <div className="feature-title">{f.title}</div>
-              <div className="feature-body">{f.body}</div>
+              {f.body && <div className="feature-body">{f.body}</div>}
             </div>
           </div>
         ))}
