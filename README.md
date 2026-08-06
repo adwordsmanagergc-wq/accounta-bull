@@ -57,6 +57,8 @@ To swap in a new logo later, replace those two files (same names). If
    - `supabase/migrations/0006_measurements.sql` (weight log)
    - `supabase/migrations/0007_rewards_cheers_sharing.sql` (rewards catalog +
      redeem RPC, herd cheers, progress-photo sharing)
+   - `supabase/migrations/0008_targets_feedback.sql` (progress targets with %
+     tracking + herd feedback on shared progress)
 3. **Project Settings → API** → copy the **Project URL** and **anon public key**
    into `.env`:
    ```
