@@ -20,31 +20,7 @@ export default function Profile() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [editingBio, setEditingBio] = useState(false)
   const [bio, setBio] = useState(profile?.bio ?? '')
-  const [editingUsername, setEditingUsername] = useState(false)
-  const [username, setUsername] = useState(profile?.username ?? '')
   const tone: BoostTone = profile?.boost_tone ?? 'medium'
-
-  async function saveUsername() {
-    if (!user) return
-    const clean = username.trim().toLowerCase().replace(/[^a-z0-9_]/g, '')
-    if (clean.length < 3) {
-      showToast('Username needs 3+ letters, numbers or underscores.', '⚠️')
-      return
-    }
-    setBusy(true)
-    try {
-      const { error } = await supabase.from('profiles').update({ username: clean }).eq('id', user.id)
-      if (error) throw error
-      await refreshProfile()
-      setEditingUsername(false)
-      showToast('Username saved', '✅')
-    } catch (err) {
-      const msg = err instanceof Error && err.message.includes('duplicate') ? 'That username is taken.' : 'Could not save username.'
-      showToast(msg, '⚠️')
-    } finally {
-      setBusy(false)
-    }
-  }
 
   async function saveTone(next: BoostTone) {
     if (!user || next === tone) return
@@ -187,31 +163,6 @@ export default function Profile() {
         <div className="muted" style={{ fontSize: 14 }}>
           {user?.email}
         </div>
-
-        {editingUsername ? (
-          <div className="join-row" style={{ marginTop: 10 }}>
-            <input
-              className="input"
-              value={username}
-              maxLength={20}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="username"
-              autoComplete="off"
-            />
-            <button className="btn btn-primary btn-join" disabled={busy} onClick={saveUsername}>Save</button>
-          </div>
-        ) : (
-          <button
-            className="link-btn"
-            style={{ margin: '6px auto 0', fontSize: 13 }}
-            onClick={() => {
-              setUsername(profile?.username ?? '')
-              setEditingUsername(true)
-            }}
-          >
-            {profile?.username ? `@${profile.username}` : '＋ Set a username (to be added as a co-coach)'}
-          </button>
-        )}
 
         {editingBio ? (
           <div className="stack" style={{ marginTop: 12, textAlign: 'left' }}>

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { supabase } from '../../lib/supabase'
 import GroupTasks from '../../components/GroupTasks'
 import {
   acceptMembership,
@@ -14,7 +15,7 @@ import {
 import type { Membership } from '../../lib/types'
 
 export default function CoachHome() {
-  const { user } = useAuth()
+  const { user, profile, refreshProfile } = useAuth()
   const { showToast } = useToast()
   const navigate = useNavigate()
 
@@ -24,6 +25,31 @@ export default function CoachHome() {
   const [newName, setNewName] = useState('')
   const [joinCode, setJoinCode] = useState('')
   const [busy, setBusy] = useState(false)
+  const [editingUname, setEditingUname] = useState(false)
+  const [uname, setUname] = useState(profile?.username ?? '')
+
+  async function saveUsername() {
+    if (!user) return
+    const clean = uname.trim().toLowerCase().replace(/[^a-z0-9_]/g, '')
+    if (clean.length < 3) {
+      showToast('Username needs 3+ letters, numbers or underscores.', '⚠️')
+      return
+    }
+    setBusy(true)
+    try {
+      const { error } = await supabase.from('profiles').update({ username: clean }).eq('id', user.id)
+      if (error) throw error
+      await refreshProfile()
+      setEditingUname(false)
+      showToast('Username saved', '✅')
+    } catch (err) {
+      const msg =
+        err instanceof Error && err.message.includes('duplicate') ? 'That username is taken.' : 'Could not save username.'
+      showToast(msg, '⚠️')
+    } finally {
+      setBusy(false)
+    }
+  }
 
   const load = useCallback(async () => {
     if (!user) return
@@ -137,6 +163,45 @@ export default function CoachHome() {
       </div>
 
       {error && <div className="form-error">{error}</div>}
+
+      <div className="card" style={{ marginBottom: 16 }}>
+        <div className="row between">
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontWeight: 700 }}>Your coach username</div>
+            <div className="muted" style={{ fontSize: 13 }}>
+              {profile?.username
+                ? `@${profile.username}`
+                : 'Set one so a head coach can add you as a co-coach.'}
+            </div>
+          </div>
+          {!editingUname && (
+            <button
+              className="btn btn-ghost btn-sm"
+              onClick={() => {
+                setUname(profile?.username ?? '')
+                setEditingUname(true)
+              }}
+            >
+              {profile?.username ? 'Edit' : 'Set'}
+            </button>
+          )}
+        </div>
+        {editingUname && (
+          <div className="join-row" style={{ marginTop: 10 }}>
+            <input
+              className="input"
+              value={uname}
+              maxLength={20}
+              onChange={(e) => setUname(e.target.value)}
+              placeholder="username"
+              autoComplete="off"
+            />
+            <button className="btn btn-primary btn-join" disabled={busy} onClick={saveUsername}>
+              Save
+            </button>
+          </div>
+        )}
+      </div>
 
       {pending.length > 0 && (
         <div className="card" style={{ marginBottom: 16 }}>
