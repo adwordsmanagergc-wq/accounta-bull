@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState, type CSSProperties } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import Avatar from '../../components/Avatar'
+import GroupTasks from '../../components/GroupTasks'
 import {
   addCoachByUsername,
   assignTask,
@@ -57,23 +58,33 @@ export default function TeamDashboard() {
     )
   }
 
+  const pageStyle: CSSProperties = team?.logo_url
+    ? {
+        backgroundImage: `linear-gradient(180deg, rgba(10,22,40,0.93) 0%, rgba(10,22,40,0.985) 60%), url(${team.logo_url})`,
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center 96px',
+        backgroundSize: '80% auto',
+        backgroundAttachment: 'fixed',
+      }
+    : {}
+
   return (
-    <div className="page-pad" style={team?.accent ? ({ ['--team-accent' as string]: team.accent }) : undefined}>
+    <div className="page-pad" style={pageStyle}>
       <button className="back-link link-btn" onClick={() => navigate('/coach')}>← Teams</button>
 
-      <div className="team-header">
-        <div className="team-badge lg" style={team?.accent ? { background: team.accent } : undefined}>
+      <div className="team-banner" style={team?.accent ? { backgroundImage: team.accent } : undefined}>
+        <div className="team-badge lg on-banner">
           {team?.logo_url ? <img src={team.logo_url} alt="" /> : (team?.name ?? '?').slice(0, 1).toUpperCase()}
         </div>
-        <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: 24 }}>{team?.name}</h1>
-          <div className="muted" style={{ fontSize: 13 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h1 className="banner-title">{team?.name}</h1>
+          <div className="banner-sub">
             {clients.length} client{clients.length === 1 ? '' : 's'} · {coaches.length} coach{coaches.length === 1 ? '' : 'es'}
           </div>
         </div>
         {isOwner && (
-          <button className="btn btn-ghost btn-sm" onClick={() => navigate(`/coach/team/${id}/branding`)}>
-            ⚙️ Brand
+          <button className="btn btn-ghost btn-sm brand-btn" onClick={() => navigate(`/coach/team/${id}/branding`)}>
+            ⚙️
           </button>
         )}
       </div>
@@ -85,6 +96,8 @@ export default function TeamDashboard() {
       <AssignPanel teamId={id} clients={clients} busy={busy} setBusy={setBusy} />
 
       <PushPanel teamId={id} clients={clients} busy={busy} setBusy={setBusy} />
+
+      {user && <GroupTasks teamId={id} canManage={isOwner || coaches.some((c) => c.user_id === user.id)} userId={user.id} />}
 
       <div className="section-label">Clients</div>
       {loaded && clients.length === 0 && <div className="muted" style={{ marginBottom: 12 }}>No clients yet. Share an invite code above.</div>}

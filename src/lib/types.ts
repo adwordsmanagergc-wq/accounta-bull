@@ -43,9 +43,21 @@ export interface Team {
   owner_id: string
   name: string
   logo_url: string | null
-  accent: string | null
+  accent: string | null // a CSS gradient string (see TEAM_GRADIENTS)
   created_at: string
 }
+
+// Preset gradients for team branding. The chosen gradient's CSS is stored in
+// teams.accent and used as a background wherever the team is shown.
+export const TEAM_GRADIENTS: { name: string; css: string }[] = [
+  { name: 'Charge', css: 'linear-gradient(135deg, #ff9a3d 0%, #f5821f 55%, #d94f7a 100%)' },
+  { name: 'Gold', css: 'linear-gradient(135deg, #f6d488 0%, #c9a96a 100%)' },
+  { name: 'Ocean', css: 'linear-gradient(135deg, #3b82f6 0%, #22d3ee 100%)' },
+  { name: 'Forest', css: 'linear-gradient(135deg, #34d399 0%, #15803d 100%)' },
+  { name: 'Berry', css: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)' },
+  { name: 'Ember', css: 'linear-gradient(135deg, #ef4444 0%, #f59e0b 100%)' },
+  { name: 'Midnight', css: 'linear-gradient(135deg, #3457a6 0%, #101f3a 100%)' },
+]
 
 export interface TeamMember {
   id: string
@@ -64,6 +76,24 @@ export interface TeamMemberWithProfile extends TeamMember {
 export interface Membership {
   member: TeamMember
   team: Team
+}
+
+export interface TeamTask {
+  id: string
+  team_id: string
+  created_by: string
+  title: string
+  description: string | null
+  active: boolean
+  created_at: string
+}
+
+export interface TeamTaskCheckin {
+  id: string
+  task_id: string
+  user_id: string
+  note: string | null
+  completed_at: string
 }
 
 export type CoachNoteKind = 'suggestion' | 'report' | 'note'

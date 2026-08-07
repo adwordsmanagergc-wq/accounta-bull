@@ -3,8 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { fetchTeam, updateTeamBranding, uploadTeamLogo } from '../../lib/coach'
-
-const ACCENTS = ['#f5821f', '#c9a96a', '#3b82f6', '#22c55e', '#ef4444', '#a855f7']
+import { TEAM_GRADIENTS } from '../../lib/types'
 
 export default function TeamBranding() {
   const { id = '' } = useParams()
@@ -67,12 +66,15 @@ export default function TeamBranding() {
       <div className="page-head"><h1>Team branding</h1></div>
 
       <div className="card center" style={{ marginBottom: 16 }}>
-        <button className="avatar-edit" onClick={() => fileRef.current?.click()} disabled={busy} title="Upload logo">
-          <div className="team-badge lg" style={accent ? { background: accent } : undefined}>
-            {logo ? <img src={logo} alt="" /> : (name || '?').slice(0, 1).toUpperCase()}
-          </div>
-          <span className="avatar-cam">{busy ? '…' : '📷'}</span>
-        </button>
+        <div className="team-banner preview" style={accent ? { backgroundImage: accent } : undefined}>
+          <button className="avatar-edit" onClick={() => fileRef.current?.click()} disabled={busy} title="Upload logo">
+            <div className="team-badge lg on-banner">
+              {logo ? <img src={logo} alt="" /> : (name || '?').slice(0, 1).toUpperCase()}
+            </div>
+            <span className="avatar-cam">{busy ? '…' : '📷'}</span>
+          </button>
+        </div>
+        <div className="muted" style={{ fontSize: 12, marginTop: 8 }}>Your logo also floats faintly behind the team page.</div>
         <input ref={fileRef} type="file" accept="image/*" hidden onChange={onLogo} />
       </div>
 
@@ -82,19 +84,24 @@ export default function TeamBranding() {
           <input className="input" value={name} maxLength={60} onChange={(e) => setName(e.target.value)} />
         </div>
         <div className="field">
-          <label>Accent colour</label>
-          <div className="row" style={{ gap: 10, flexWrap: 'wrap' }}>
-            {ACCENTS.map((c) => (
+          <label>Theme</label>
+          <div className="gradient-grid">
+            {TEAM_GRADIENTS.map((g) => (
               <button
-                key={c}
-                className={`swatch${accent === c ? ' on' : ''}`}
-                style={{ background: c }}
-                onClick={() => setAccent(c)}
-                aria-label={c}
-              />
+                key={g.name}
+                className={`gradient-swatch${accent === g.css ? ' on' : ''}`}
+                style={{ backgroundImage: g.css }}
+                onClick={() => setAccent(g.css)}
+                title={g.name}
+              >
+                <span>{g.name}</span>
+              </button>
             ))}
-            <button className={`swatch none${accent === null ? ' on' : ''}`} onClick={() => setAccent(null)} aria-label="default">
-              ×
+            <button
+              className={`gradient-swatch none${accent === null ? ' on' : ''}`}
+              onClick={() => setAccent(null)}
+            >
+              <span>None</span>
             </button>
           </div>
         </div>

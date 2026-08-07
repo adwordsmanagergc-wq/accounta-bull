@@ -1397,3 +1397,103 @@ select {
   background: var(--navy-600);
   color: var(--text-faint);
 }
+
+/* ---------- Team banner + branding ---------- */
+.team-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 18px;
+  margin-bottom: 18px;
+  background: linear-gradient(135deg, var(--card-2), var(--card));
+  border: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+.team-banner.preview {
+  justify-content: center;
+  padding: 22px;
+}
+.banner-title {
+  font-size: 22px;
+  color: #fff;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.banner-sub {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+.brand-btn {
+  flex: 0 0 auto;
+  padding: 8px 12px;
+}
+.team-badge.on-banner {
+  background: rgba(255, 255, 255, 0.18);
+}
+.gradient-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.gradient-swatch {
+  height: 46px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.gradient-swatch.none {
+  background: var(--navy-600);
+  color: var(--text-dim);
+  text-shadow: none;
+}
+.gradient-swatch.on {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--navy);
+}
+
+/* ---------- Group tasks ---------- */
+.group-task {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+.group-task:first-of-type {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
+}
+.done-row {
+  margin-top: 8px;
+  font-size: 14px;
+  color: var(--success);
+}
+.checkin-list {
+  margin-top: 6px;
+  border-top: 1px dashed var(--border);
+  padding-top: 4px;
+}
+.checkin-row {
+  font-size: 13px;
+  margin-top: 6px;
+}
+.checkin-name {
+  font-weight: 600;
+}
+.checkin-note {
+  color: var(--text-dim);
+  font-size: 13px;
+  margin-top: 2px;
+  font-style: italic;
+}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import GroupTasks from '../../components/GroupTasks'
 import {
   acceptMembership,
   createTeam,
@@ -216,6 +217,11 @@ export default function CoachHome() {
                   onChange={(e) => togglePhotos(m.team.id, e.target.checked)}
                 />
               </label>
+              {user && (
+                <div style={{ marginTop: 12 }}>
+                  <GroupTasks teamId={m.team.id} canManage={false} userId={user.id} />
+                </div>
+              )}
             </div>
           ))}
 

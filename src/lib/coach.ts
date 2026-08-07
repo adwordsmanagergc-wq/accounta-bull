@@ -9,6 +9,8 @@ import type {
   Team,
   TeamMember,
   TeamMemberWithProfile,
+  TeamTask,
+  TeamTaskCheckin,
 } from './types'
 
 // ----- Teams & membership ---------------------------------------------------
@@ -177,6 +179,74 @@ export async function fetchClientSharedPhotos(clientId: string): Promise<Progres
     .order('taken_on', { ascending: false })
   if (error) throw error
   return (data as ProgressPhoto[]) ?? []
+}
+
+// ----- Group tasks (shared team task everyone checks off) -------------------
+
+export async function fetchTeamTasks(teamId: string): Promise<TeamTask[]> {
+  const { data, error } = await supabase
+    .from('team_tasks')
+    .select('*')
+    .eq('team_id', teamId)
+    .eq('active', true)
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data as TeamTask[]) ?? []
+}
+
+export async function fetchTeamTaskCheckins(taskIds: string[]): Promise<TeamTaskCheckin[]> {
+  if (taskIds.length === 0) return []
+  const { data, error } = await supabase
+    .from('team_task_checkins')
+    .select('*')
+    .in('task_id', taskIds)
+    .order('completed_at', { ascending: true })
+  if (error) throw error
+  return (data as TeamTaskCheckin[]) ?? []
+}
+
+export async function addTeamTask(
+  teamId: string,
+  createdBy: string,
+  title: string,
+  description: string | null
+): Promise<void> {
+  const { error } = await supabase
+    .from('team_tasks')
+    .insert({ team_id: teamId, created_by: createdBy, title, description })
+  if (error) throw error
+}
+
+export async function deleteTeamTask(id: string): Promise<void> {
+  const { error } = await supabase.from('team_tasks').delete().eq('id', id)
+  if (error) throw error
+}
+
+export async function checkOffTask(taskId: string, userId: string, note: string | null): Promise<void> {
+  const { error } = await supabase
+    .from('team_task_checkins')
+    .upsert(
+      { task_id: taskId, user_id: userId, note, completed_at: new Date().toISOString() },
+      { onConflict: 'task_id,user_id' }
+    )
+  if (error) throw error
+}
+
+export async function uncheckTask(taskId: string, userId: string): Promise<void> {
+  const { error } = await supabase.from('team_task_checkins').delete().eq('task_id', taskId).eq('user_id', userId)
+  if (error) throw error
+}
+
+/** Display names for a set of user ids (readable for teammates via RLS). */
+export async function fetchProfileNames(ids: string[]): Promise<Record<string, string>> {
+  const unique = Array.from(new Set(ids))
+  if (unique.length === 0) return {}
+  const { data } = await supabase.from('profiles').select('id,name,username').in('id', unique)
+  const map: Record<string, string> = {}
+  for (const p of (data as Array<{ id: string; name: string | null; username: string | null }>) ?? []) {
+    map[p.id] = p.name || p.username || 'Member'
+  }
+  return map
 }
 
 // ----- Custom push ----------------------------------------------------------
