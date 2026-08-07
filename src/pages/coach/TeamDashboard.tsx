@@ -160,8 +160,10 @@ function InvitePanel({
       const c = await createInviteCode(teamId, 'client')
       setCode(c)
       onChange()
-    } catch {
-      showToast('Could not create an invite.', '⚠️')
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Could not create an invite.'
+      showToast(msg, '⚠️')
+      console.error(e)
     } finally {
       setBusy(false)
     }

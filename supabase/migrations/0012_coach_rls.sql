@@ -87,7 +87,8 @@ declare me uuid := auth.uid(); c text;
 begin
   if not public.is_team_coach(p_team) then raise exception 'Only a coach can create invites'; end if;
   if p_role not in ('client', 'coach') then raise exception 'Invalid role'; end if;
-  c := encode(gen_random_bytes(6), 'hex');
+  -- gen_random_uuid() is built in (no pgcrypto needed); take 12 hex chars.
+  c := substr(replace(gen_random_uuid()::text, '-', ''), 1, 12);
   insert into public.team_invites (code, team_id, role, created_by, max_uses, expires_at)
     values (c, p_team, p_role, me, p_max_uses, p_expires);
   return c;
