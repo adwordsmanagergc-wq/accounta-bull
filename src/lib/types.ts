@@ -31,6 +31,51 @@ export interface Profile {
   avatar_url: string | null
   bio: string | null
   boost_tone: BoostTone | null
+  username: string | null
+  created_at: string
+}
+
+// ----- Coach / Team (business) feature -----
+export type TeamRole = 'owner' | 'coach' | 'client'
+
+export interface Team {
+  id: string
+  owner_id: string
+  name: string
+  logo_url: string | null
+  accent: string | null
+  created_at: string
+}
+
+export interface TeamMember {
+  id: string
+  team_id: string
+  user_id: string
+  role: TeamRole
+  status: 'pending' | 'active'
+  share_photos: boolean
+  created_at: string
+}
+
+export interface TeamMemberWithProfile extends TeamMember {
+  profile: Pick<Profile, 'id' | 'name' | 'username' | 'avatar_url' | 'horns' | 'streak'> | null
+}
+
+export interface Membership {
+  member: TeamMember
+  team: Team
+}
+
+export type CoachNoteKind = 'suggestion' | 'report' | 'note'
+
+export interface CoachNote {
+  id: string
+  team_id: string
+  author_id: string
+  about_user: string | null
+  kind: CoachNoteKind
+  body: string
+  resolved_at: string | null
   created_at: string
 }
 

@@ -1,4 +1,5 @@
-import { Navigate, Route, Routes, useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import { useReminders } from './hooks/useReminders'
 import TabBar from './components/TabBar'
@@ -12,6 +13,11 @@ import Profile from './pages/Profile'
 import Herd from './pages/Herd'
 import Progress from './pages/Progress'
 import Rewards from './pages/Rewards'
+import JoinTeam from './pages/JoinTeam'
+import CoachHome from './pages/coach/CoachHome'
+import TeamDashboard from './pages/coach/TeamDashboard'
+import ClientDetail from './pages/coach/ClientDetail'
+import TeamBranding from './pages/coach/TeamBranding'
 
 function Loading() {
   return (
@@ -24,7 +30,21 @@ function Loading() {
 /** Wraps the signed-in area: gates on auth, runs reminders, shows the tab bar. */
 function AppLayout() {
   const { user, loading } = useAuth()
+  const navigate = useNavigate()
   useReminders(user?.id)
+
+  // If they followed an invite link before signing in, finish the join now.
+  useEffect(() => {
+    if (!user) return
+    let code: string | null = null
+    try {
+      code = sessionStorage.getItem('pending_team_code')
+      if (code) sessionStorage.removeItem('pending_team_code')
+    } catch {
+      /* ignore */
+    }
+    if (code) navigate(`/join/${code}`, { replace: true })
+  }, [user, navigate])
 
   if (loading) return <Loading />
   if (!user) return <Navigate to="/" replace />
@@ -40,6 +60,10 @@ function AppLayout() {
         <Route path="/progress" element={<Progress />} />
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/coach" element={<CoachHome />} />
+        <Route path="/coach/team/:id" element={<TeamDashboard />} />
+        <Route path="/coach/team/:id/branding" element={<TeamBranding />} />
+        <Route path="/coach/team/:id/client/:userId" element={<ClientDetail />} />
         <Route path="*" element={<Navigate to="/today" replace />} />
       </Routes>
       <TabBar />
@@ -88,6 +112,7 @@ export default function App() {
           </PublicOnly>
         }
       />
+      <Route path="/join/:code" element={<JoinTeam />} />
       <Route path="/*" element={<AppLayout />} />
     </Routes>
   )
