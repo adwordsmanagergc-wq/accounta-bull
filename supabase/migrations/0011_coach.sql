@@ -10,27 +10,13 @@
 -- Nothing existing is rewritten; solo users are completely unaffected.
 -- RLS is enabled on the new tables with NO policies yet (deny-all) — the access
 -- rules land in Stage B.
+--
+-- NOTE: the new tables are created FIRST, because goals.team_id references
+-- public.teams. (Statements run top-to-bottom in one transaction.)
 -- ---------------------------------------------------------------------------
 
 -- ===========================================================================
--- Additive columns on existing tables (nullable, default null)
--- ===========================================================================
-
--- Assigned tasks reuse the goals table: the client stays the row owner
--- (user_id), so Today / completions / streaks / horns keep working unchanged.
--- These two columns just tag a goal as assigned by a coach within a Team.
-alter table public.goals add column if not exists team_id     uuid references public.teams (id) on delete set null;
-alter table public.goals add column if not exists assigned_by uuid references auth.users (id) on delete set null;
-create index if not exists goals_team_idx on public.goals (team_id);
-
--- Username, needed to invite a co-coach by handle. Case-insensitive unique,
--- but only enforced for rows that actually set one (many nulls allowed).
-alter table public.profiles add column if not exists username text;
-create unique index if not exists profiles_username_key
-  on public.profiles (lower(username)) where username is not null;
-
--- ===========================================================================
--- New tables
+-- New tables (created before the goals FK that references teams)
 -- ===========================================================================
 
 -- The coach's business group.
@@ -98,6 +84,22 @@ create table if not exists public.team_coach_notes (
   created_at  timestamptz not null default now()
 );
 create index if not exists team_coach_notes_team_idx on public.team_coach_notes (team_id);
+
+-- ===========================================================================
+-- Additive columns on existing tables (now that teams exists)
+-- ===========================================================================
+
+-- Assigned tasks reuse the goals table: the client stays the row owner
+-- (user_id), so Today / completions / streaks / horns keep working unchanged.
+alter table public.goals add column if not exists team_id     uuid references public.teams (id) on delete set null;
+alter table public.goals add column if not exists assigned_by uuid references auth.users (id) on delete set null;
+create index if not exists goals_team_idx on public.goals (team_id);
+
+-- Username, needed to invite a co-coach by handle. Case-insensitive unique,
+-- enforced only for rows that set one (many nulls allowed).
+alter table public.profiles add column if not exists username text;
+create unique index if not exists profiles_username_key
+  on public.profiles (lower(username)) where username is not null;
 
 -- ===========================================================================
 -- Enable RLS now (deny-all until Stage B adds policies). Nothing is exposed.
