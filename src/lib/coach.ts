@@ -7,6 +7,7 @@ import type {
   Membership,
   ProgressPhoto,
   Team,
+  TeamMember,
   TeamMemberWithProfile,
 } from './types'
 
@@ -38,13 +39,26 @@ export async function fetchTeam(teamId: string): Promise<Team | null> {
 }
 
 export async function fetchTeamMembers(teamId: string): Promise<TeamMemberWithProfile[]> {
+  // Fetched in two steps: team_members.user_id points at auth.users, not
+  // profiles, so PostgREST can't embed profiles directly. Join in JS instead.
   const { data, error } = await supabase
     .from('team_members')
-    .select('*, profile:profiles(id,name,username,avatar_url,horns,streak)')
+    .select('*')
     .eq('team_id', teamId)
     .order('role', { ascending: true })
   if (error) throw error
-  return (data as TeamMemberWithProfile[]) ?? []
+  const members = (data as TeamMember[]) ?? []
+  const ids = members.map((m) => m.user_id)
+
+  const byId: Record<string, TeamMemberWithProfile['profile']> = {}
+  if (ids.length) {
+    const { data: profs } = await supabase
+      .from('profiles')
+      .select('id,name,username,avatar_url,horns,streak')
+      .in('id', ids)
+    for (const p of (profs as NonNullable<TeamMemberWithProfile['profile']>[]) ?? []) byId[p.id] = p
+  }
+  return members.map((m) => ({ ...m, profile: byId[m.user_id] ?? null }))
 }
 
 export async function updateTeamBranding(
