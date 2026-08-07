@@ -58,13 +58,13 @@ export default function TeamDashboard() {
     )
   }
 
-  const pageStyle: CSSProperties = team?.logo_url
+  // The team's gradient theme fills the whole page (a dark scrim keeps text and
+  // cards readable over it).
+  const pageStyle: CSSProperties = team?.accent
     ? {
-        backgroundImage: `linear-gradient(180deg, rgba(10,22,40,0.93) 0%, rgba(10,22,40,0.985) 60%), url(${team.logo_url})`,
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center 96px',
-        backgroundSize: '80% auto',
+        backgroundImage: `linear-gradient(180deg, rgba(10,22,40,0.32) 0%, rgba(10,22,40,0.66) 100%), ${team.accent}`,
         backgroundAttachment: 'fixed',
+        minHeight: '100dvh',
       }
     : {}
 
@@ -72,11 +72,12 @@ export default function TeamDashboard() {
     <div className="page-pad" style={pageStyle}>
       <button className="back-link link-btn" onClick={() => navigate('/coach')}>← Teams</button>
 
-      <div className="team-banner" style={team?.accent ? { backgroundImage: team.accent } : undefined}>
-        <div className="team-badge lg on-banner">
-          {team?.logo_url ? <img src={team.logo_url} alt="" /> : (team?.name ?? '?').slice(0, 1).toUpperCase()}
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
+      <div
+        className={`brand-cover${team?.logo_url ? '' : ' empty'}`}
+        style={team?.logo_url ? { backgroundImage: `url(${team.logo_url})` } : team?.accent ? { backgroundImage: team.accent } : undefined}
+      >
+        {!team?.logo_url && <span className="brand-cover-initial">{(team?.name ?? '?').slice(0, 1).toUpperCase()}</span>}
+        <div className="brand-cover-overlay">
           <h1 className="banner-title">{team?.name}</h1>
           <div className="banner-sub">
             {clients.length} client{clients.length === 1 ? '' : 's'} · {coaches.length} coach{coaches.length === 1 ? '' : 'es'}

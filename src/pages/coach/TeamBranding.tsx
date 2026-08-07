@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
@@ -60,23 +60,31 @@ export default function TeamBranding() {
     }
   }
 
+  const pageStyle: CSSProperties = accent
+    ? {
+        backgroundImage: `linear-gradient(180deg, rgba(10,22,40,0.32) 0%, rgba(10,22,40,0.66) 100%), ${accent}`,
+        backgroundAttachment: 'fixed',
+        minHeight: '100dvh',
+      }
+    : {}
+
   return (
-    <div className="page-pad">
+    <div className="page-pad" style={pageStyle}>
       <button className="back-link link-btn" onClick={() => navigate(`/coach/team/${id}`)}>← Team</button>
       <div className="page-head"><h1>Team branding</h1></div>
 
-      <div className="card center" style={{ marginBottom: 16 }}>
-        <div className="team-banner preview" style={accent ? { backgroundImage: accent } : undefined}>
-          <button className="avatar-edit" onClick={() => fileRef.current?.click()} disabled={busy} title="Upload logo">
-            <div className="team-badge lg on-banner">
-              {logo ? <img src={logo} alt="" /> : (name || '?').slice(0, 1).toUpperCase()}
-            </div>
-            <span className="avatar-cam">{busy ? '…' : '📷'}</span>
-          </button>
-        </div>
-        <div className="muted" style={{ fontSize: 12, marginTop: 8 }}>Your logo also floats faintly behind the team page.</div>
-        <input ref={fileRef} type="file" accept="image/*" hidden onChange={onLogo} />
+      <div
+        className={`brand-cover editable${logo ? '' : ' empty'}`}
+        style={logo ? { backgroundImage: `url(${logo})` } : accent ? { backgroundImage: accent } : undefined}
+        onClick={() => !busy && fileRef.current?.click()}
+      >
+        {!logo && <span className="brand-cover-initial">{(name || '?').slice(0, 1).toUpperCase()}</span>}
+        <span className="avatar-cam">{busy ? '…' : '📷'}</span>
       </div>
+      <div className="muted" style={{ fontSize: 12, margin: '8px 0 16px' }}>
+        Tap the banner to upload your team logo. It fills the whole banner.
+      </div>
+      <input ref={fileRef} type="file" accept="image/*" hidden onChange={onLogo} />
 
       <div className="card" style={{ marginBottom: 16 }}>
         <div className="field">
