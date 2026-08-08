@@ -17,7 +17,7 @@ export default function TabBar() {
           <span className="tab-ico">
             {t.img ? <img className="tab-ico-img" src={t.img} alt="" /> : t.ico}
           </span>
-          {t.label}
+          <span className="tab-label">{t.label}</span>
         </NavLink>
       ))}
     </nav>

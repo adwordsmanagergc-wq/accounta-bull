@@ -296,15 +296,20 @@ select {
   z-index: 40;
 }
 .tabbar a {
+  flex: 1 1 0;
+  min-width: 0;
   color: var(--text-faint);
-  font-size: 11px;
   font-weight: 600;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 3px;
-  padding: 4px 10px;
+  padding: 4px 6px;
   border-radius: 12px;
+}
+.tabbar a .tab-label {
+  font-size: 11px;
+  line-height: 1;
 }
 .tabbar a .tab-ico {
   height: 24px;
