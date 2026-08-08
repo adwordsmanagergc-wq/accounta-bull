@@ -309,6 +309,16 @@ select {
 .tabbar a .tab-ico {
   font-size: 20px;
 }
+.tabbar a .tab-ico-img {
+  height: 22px;
+  width: auto;
+  display: block;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+}
+.tabbar a.active .tab-ico-img {
+  opacity: 1;
+}
 .tabbar a.active {
   color: var(--orange);
   text-decoration: none;
