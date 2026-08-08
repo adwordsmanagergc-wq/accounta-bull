@@ -14,11 +14,9 @@ export default function TabBar() {
     <nav className="tabbar">
       {tabs.map((t) => (
         <NavLink key={t.to} to={t.to} className={({ isActive }) => (isActive ? 'active' : '')} end>
-          {t.img ? (
-            <img className="tab-ico-img" src={t.img} alt="" />
-          ) : (
-            <span className="tab-ico">{t.ico}</span>
-          )}
+          <span className="tab-ico">
+            {t.img ? <img className="tab-ico-img" src={t.img} alt="" /> : t.ico}
+          </span>
           {t.label}
         </NavLink>
       ))}
