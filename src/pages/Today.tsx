@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import Logo from '../components/Logo'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { completeGoal, fetchGoals, fetchTodayCompletions } from '../lib/api'
@@ -142,7 +143,7 @@ export default function Today() {
       {loaded && !error && todays.length === 0 && (
         /* Warm daily welcome when nothing is scheduled for today */
         <div className="welcome">
-          <div className="welcome-emoji">🐂</div>
+          <div className="welcome-crest"><Logo size={120} glow /></div>
           <h2 className="welcome-title">
             {firstName ? `Ready to charge, ${firstName}?` : 'Ready to charge?'}
           </h2>
