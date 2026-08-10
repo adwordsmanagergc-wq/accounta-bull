@@ -13,6 +13,7 @@ import Profile from './pages/Profile'
 import Herd from './pages/Herd'
 import Progress from './pages/Progress'
 import Rewards from './pages/Rewards'
+import Journal from './pages/Journal'
 import JoinTeam from './pages/JoinTeam'
 import CoachHome from './pages/coach/CoachHome'
 import TeamDashboard from './pages/coach/TeamDashboard'
@@ -59,6 +60,7 @@ function AppLayout() {
         <Route path="/herd" element={<Herd />} />
         <Route path="/progress" element={<Progress />} />
         <Route path="/rewards" element={<Rewards />} />
+        <Route path="/journal" element={<Journal />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/coach" element={<CoachHome />} />
         <Route path="/coach/team/:id" element={<TeamDashboard />} />

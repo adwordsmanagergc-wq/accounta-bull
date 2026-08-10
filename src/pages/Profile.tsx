@@ -207,9 +207,14 @@ export default function Profile() {
           🎁 Rewards
         </Link>
       </div>
-      <Link to="/coach" className="btn btn-ghost" style={{ marginBottom: 16 }}>
-        🧑‍🏫 Coach / Teams
-      </Link>
+      <div className="row" style={{ gap: 10, marginBottom: 16 }}>
+        <Link to="/journal" className="btn btn-ghost" style={{ flex: 1 }}>
+          📔 Journal
+        </Link>
+        <Link to="/coach" className="btn btn-ghost" style={{ flex: 1 }}>
+          🧑‍🏫 Coach / Teams
+        </Link>
+      </div>
 
       <div className="stat-grid" style={{ marginBottom: 16 }}>
         <div className="card stat">

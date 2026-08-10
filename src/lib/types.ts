@@ -32,7 +32,20 @@ export interface Profile {
   bio: string | null
   boost_tone: BoostTone | null
   username: string | null
+  wake_time: string | null
+  bed_time: string | null
   created_at: string
+}
+
+export interface JournalEntry {
+  id: string
+  user_id: string
+  entry_date: string
+  morning_plan: string | null
+  evening_reflection: string | null
+  achieved: boolean | null
+  created_at: string
+  updated_at: string
 }
 
 // ----- Coach / Team (business) feature -----
