@@ -20,7 +20,9 @@ self.addEventListener('push', (event) => {
   const options = {
     body: data.body || 'Time to charge.',
     icon: data.icon || '/icon-192.png',
-    badge: '/icon-192.png',
+    // Android draws the badge from its alpha only, so this must be a transparent
+    // silhouette (a solid icon here renders as a white box).
+    badge: '/badge-96.png',
     tag: data.tag,
     renotify: Boolean(data.tag),
     data: { url: data.url || '/' },
