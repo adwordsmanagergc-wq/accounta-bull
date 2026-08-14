@@ -2,8 +2,9 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
-import { fetchEntry, fetchHistory, saveEvening, saveMorning, saveTimes, todayDate } from '../lib/journal'
-import type { JournalEntry } from '../lib/types'
+import { fetchEntry, fetchHistory, fetchJournalMedia, saveEvening, saveMorning, saveTimes, todayDate } from '../lib/journal'
+import { signedProgressUrl } from '../lib/storage'
+import type { JournalEntry, JournalMedia } from '../lib/types'
 
 function prettyDate(d: string): string {
   return new Date(d + 'T00:00:00').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' })
@@ -21,19 +22,34 @@ export default function Journal() {
   const [reflection, setReflection] = useState('')
   const [achieved, setAchieved] = useState<boolean | null>(null)
   const [history, setHistory] = useState<JournalEntry[]>([])
+  const [media, setMedia] = useState<JournalMedia[]>([])
+  const [mediaUrls, setMediaUrls] = useState<Record<string, string>>({})
   const [loaded, setLoaded] = useState(false)
   const [busy, setBusy] = useState(false)
 
   const load = useCallback(async () => {
     if (!user) return
     try {
-      const [entry, hist] = await Promise.all([fetchEntry(user.id, date), fetchHistory(user.id)])
+      const [entry, hist, med] = await Promise.all([
+        fetchEntry(user.id, date),
+        fetchHistory(user.id),
+        fetchJournalMedia(user.id),
+      ])
       if (entry) {
         setPlan(entry.morning_plan ?? '')
         setReflection(entry.evening_reflection ?? '')
         setAchieved(entry.achieved)
       }
       setHistory(hist.filter((h) => h.entry_date !== date))
+      setMedia(med)
+      const urls: Record<string, string> = {}
+      await Promise.all(
+        med.map(async (m) => {
+          const u = await signedProgressUrl(m.storage_path)
+          if (u) urls[m.id] = u
+        })
+      )
+      setMediaUrls(urls)
     } catch (e) {
       console.error(e)
     } finally {
@@ -153,6 +169,23 @@ export default function Journal() {
           />
         </div>
         <button className="btn btn-primary btn-sm" disabled={busy} onClick={onSaveReflection}>Save reflection</button>
+
+        {media.filter((m) => m.entry_date === date).length > 0 && (
+          <>
+            <div className="section-label" style={{ marginTop: 16 }}>Today’s captures</div>
+            <div className="journal-media">
+              {media.filter((m) => m.entry_date === date).map((m) => (
+                <div className="journal-media-item" key={m.id}>
+                  {mediaUrls[m.id] ? (
+                    m.media_type === 'video'
+                      ? <video src={mediaUrls[m.id]} controls playsInline />
+                      : <img src={mediaUrls[m.id]} alt={m.note ?? 'capture'} />
+                  ) : <div className="photo-skeleton" />}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="section-label">Past entries</div>
@@ -165,6 +198,19 @@ export default function Journal() {
           </div>
           {h.morning_plan && <div style={{ marginTop: 6 }}><span className="muted">Plan: </span>{h.morning_plan}</div>}
           {h.evening_reflection && <div style={{ marginTop: 4 }}><span className="muted">Reflection: </span>{h.evening_reflection}</div>}
+          {media.filter((m) => m.entry_date === h.entry_date).length > 0 && (
+            <div className="journal-media" style={{ marginTop: 8 }}>
+              {media.filter((m) => m.entry_date === h.entry_date).map((m) => (
+                <div className="journal-media-item" key={m.id}>
+                  {mediaUrls[m.id] ? (
+                    m.media_type === 'video'
+                      ? <video src={mediaUrls[m.id]} controls playsInline />
+                      : <img src={mediaUrls[m.id]} alt={m.note ?? 'capture'} />
+                  ) : <div className="photo-skeleton" />}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       ))}
     </div>

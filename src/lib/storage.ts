@@ -29,7 +29,12 @@ export async function uploadHerdPhoto(
   return supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl
 }
 
-/** Upload a PRIVATE progress photo; returns its storage path (sign it to view). */
+/** 'video' for video files, otherwise 'image'. */
+export function mediaKind(file: File): 'image' | 'video' {
+  return file.type.startsWith('video') ? 'video' : 'image'
+}
+
+/** Upload a PRIVATE progress photo or video; returns its storage path (sign it to view). */
 export async function uploadProgressPhoto(userId: string, file: File): Promise<string> {
   const path = `${userId}/${crypto.randomUUID()}.${ext(file)}`
   const { error } = await supabase.storage

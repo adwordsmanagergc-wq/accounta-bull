@@ -309,7 +309,15 @@ function PhotoTile({
   const url = usePhotoUrl(photo.storage_path)
   return (
     <div className="photo-tile">
-      {url ? <img src={url} alt={photo.note ?? 'progress'} /> : <div className="photo-skeleton" />}
+      {url ? (
+        photo.media_type === 'video' ? (
+          <video src={url} controls playsInline />
+        ) : (
+          <img src={url} alt={photo.note ?? 'progress'} />
+        )
+      ) : (
+        <div className="photo-skeleton" />
+      )}
       <button className="photo-del" onClick={onDelete} title="Delete">
         ✕
       </button>

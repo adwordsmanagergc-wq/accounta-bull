@@ -138,6 +138,17 @@ export interface ProgressPhoto {
   taken_on: string
   note: string | null
   shared_with_herd: boolean
+  media_type: 'image' | 'video'
+  created_at: string
+}
+
+export interface JournalMedia {
+  id: string
+  user_id: string
+  entry_date: string
+  storage_path: string
+  media_type: 'image' | 'video'
+  note: string | null
   created_at: string
 }
 

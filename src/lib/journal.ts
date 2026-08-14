@@ -1,6 +1,6 @@
 import { supabase } from './supabase'
 import { todayKey } from './game'
-import type { JournalEntry } from './types'
+import type { JournalEntry, JournalMedia } from './types'
 
 /** Local date key "YYYY-MM-DD" for today. */
 export function todayDate(): string {
@@ -54,6 +54,30 @@ export async function saveEvening(
       { onConflict: 'user_id,entry_date' }
     )
   if (error) throw error
+}
+
+export async function addJournalMedia(
+  userId: string,
+  date: string,
+  storagePath: string,
+  mediaType: 'image' | 'video',
+  note: string | null = null
+): Promise<void> {
+  const { error } = await supabase
+    .from('journal_media')
+    .insert({ user_id: userId, entry_date: date, storage_path: storagePath, media_type: mediaType, note })
+  if (error) throw error
+}
+
+export async function fetchJournalMedia(userId: string, limit = 60): Promise<JournalMedia[]> {
+  const { data, error } = await supabase
+    .from('journal_media')
+    .select('*')
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return (data as JournalMedia[]) ?? []
 }
 
 export async function saveTimes(userId: string, wake: string | null, bed: string | null): Promise<void> {

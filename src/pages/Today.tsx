@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Logo from '../components/Logo'
+import CompletionCapture from '../components/CompletionCapture'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { completeGoal, fetchGoals, fetchTodayCompletions } from '../lib/api'
@@ -35,6 +36,7 @@ export default function Today() {
   const [loaded, setLoaded] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
+  const [capture, setCapture] = useState<Goal | null>(null)
   // Re-render each minute so meters/labels stay live.
   const [, setTick] = useState(0)
 
@@ -103,6 +105,7 @@ export default function Today() {
         },
       }))
       showToast(`+${goal.horn_value} horns! Total ${newTotal} 🏆`, '🐂')
+      setCapture(goal)
     } catch (e) {
       showToast('Could not save, try again.', '⚠️')
       console.error(e)
@@ -262,6 +265,10 @@ export default function Today() {
             </Link>
           </div>
         </>
+      )}
+
+      {capture && user && (
+        <CompletionCapture goal={capture} userId={user.id} onClose={() => setCapture(null)} />
       )}
     </div>
   )

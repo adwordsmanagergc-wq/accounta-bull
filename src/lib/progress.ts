@@ -14,7 +14,7 @@ export async function fetchProgressPhotos(userId: string): Promise<ProgressPhoto
 
 export async function addProgressPhoto(
   userId: string,
-  input: { phase: PhotoPhase; storage_path: string; taken_on: string; note: string }
+  input: { phase: PhotoPhase; storage_path: string; taken_on: string; note: string; media_type?: 'image' | 'video' }
 ): Promise<void> {
   const { error } = await supabase.from('progress_photos').insert({
     user_id: userId,
@@ -22,6 +22,7 @@ export async function addProgressPhoto(
     storage_path: input.storage_path,
     taken_on: input.taken_on,
     note: input.note || null,
+    media_type: input.media_type ?? 'image',
   })
   if (error) throw error
 }
