@@ -196,7 +196,7 @@ function InvitePanel({
 
   return (
     <div className="card" style={{ marginBottom: 14 }}>
-      <div style={{ fontWeight: 700, marginBottom: 6 }}>Invite clients</div>
+      <div style={{ fontWeight: 700, marginBottom: 6 }}>Invite Team Member</div>
       {!code ? (
         <button className="btn btn-primary btn-sm" disabled={busy} onClick={make}>
           Create an invite link
