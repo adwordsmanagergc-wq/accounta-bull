@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import Avatar from '../components/Avatar'
-import { fetchMyMemberships } from '../lib/coach'
 import { prepareUpload } from '../lib/media'
 import { uploadFeedMedia } from '../lib/storage'
 import {
@@ -33,12 +32,10 @@ export default function Feed() {
   const [comments, setComments] = useState<Record<string, PostComment[]>>({})
   const [cheers, setCheers] = useState<Record<string, { count: number; mine: boolean }>>({})
   const [authors, setAuthors] = useState<Record<string, Author>>({})
-  const [teams, setTeams] = useState<{ id: string; name: string }[]>([])
   const [loaded, setLoaded] = useState(false)
   const [busy, setBusy] = useState(false)
 
   // composer
-  const [scope, setScope] = useState('herd')
   const [body, setBody] = useState('')
   const [file, setFile] = useState<File | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
@@ -73,10 +70,7 @@ export default function Feed() {
 
   useEffect(() => {
     load()
-    if (user) fetchMyMemberships(user.id).then((ms) =>
-      setTeams(ms.filter((m) => m.member.status === 'active').map((m) => ({ id: m.team.id, name: m.team.name })))
-    ).catch(() => {})
-  }, [load, user])
+  }, [load])
 
   async function pickMedia(e: React.ChangeEvent<HTMLInputElement>) {
     const raw = e.target.files?.[0] ?? null
@@ -103,8 +97,8 @@ export default function Feed() {
       }
       await createPost({
         userId: user.id,
-        scope: scope === 'herd' ? 'herd' : 'team',
-        teamId: scope === 'herd' ? null : scope,
+        scope: 'herd',
+        teamId: null,
         body: body.trim() || null,
         mediaUrl,
         mediaType,
@@ -149,7 +143,6 @@ export default function Feed() {
   }
 
   const nameOf = (uid: string) => authors[uid]?.name || authors[uid]?.username || 'Member'
-  const scopeLabel = (p: Post) => (p.scope === 'team' ? teams.find((t) => t.id === p.team_id)?.name || 'Team' : 'Herd')
 
   return (
     <div className="page-pad">
@@ -157,14 +150,6 @@ export default function Feed() {
       <div className="page-head"><h1>Feed</h1></div>
 
       <div className="card" style={{ marginBottom: 16 }}>
-        <div className="field" style={{ marginBottom: 8 }}>
-          <select className="input" value={scope} onChange={(e) => setScope(e.target.value)}>
-            <option value="herd">Share with my herd</option>
-            {teams.map((t) => (
-              <option key={t.id} value={t.id}>Share with {t.name}</option>
-            ))}
-          </select>
-        </div>
         <textarea
           className="input"
           rows={2}
@@ -199,7 +184,7 @@ export default function Feed() {
               <Avatar url={authors[p.user_id]?.avatar_url} name={nameOf(p.user_id)} size={38} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 700 }}>{nameOf(p.user_id)}</div>
-                <div className="faint" style={{ fontSize: 12 }}>{timeLabel(p.created_at)} · {scopeLabel(p)}</div>
+                <div className="faint" style={{ fontSize: 12 }}>{timeLabel(p.created_at)}</div>
               </div>
               {p.user_id === user?.id && (
                 <button className="link-btn tiny-danger" title="Delete" onClick={async () => {

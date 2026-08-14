@@ -36,10 +36,12 @@ export async function fetchAuthors(ids: string[]): Promise<Record<string, Author
   return map
 }
 
+/** The global feed is herd-only; team posts live inside their team page. */
 export async function fetchFeed(limit = 50): Promise<Post[]> {
   const { data, error } = await supabase
     .from('posts')
     .select('*')
+    .eq('scope', 'herd')
     .order('created_at', { ascending: false })
     .limit(limit)
   if (error) throw error
