@@ -46,6 +46,19 @@ export async function fetchFeed(limit = 50): Promise<Post[]> {
   return (data as Post[]) ?? []
 }
 
+/** Posts shared with one specific team (RLS still enforces membership). */
+export async function fetchTeamFeed(teamId: string, limit = 50): Promise<Post[]> {
+  const { data, error } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('scope', 'team')
+    .eq('team_id', teamId)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  if (error) throw error
+  return (data as Post[]) ?? []
+}
+
 export async function createPost(input: {
   userId: string
   scope: 'herd' | 'team'

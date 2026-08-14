@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import Avatar from '../../components/Avatar'
 import GroupTasks from '../../components/GroupTasks'
+import TeamFeed from '../../components/TeamFeed'
 import { createTeamChat, fetchTeamChats, fetchUnreadConversationIds, getOrCreateDm, type Conversation } from '../../lib/chat'
 import {
   addCoachByUsername,
@@ -100,6 +101,8 @@ export default function TeamDashboard() {
       <PushPanel teamId={id} clients={clients} busy={busy} setBusy={setBusy} />
 
       {user && <GroupTasks teamId={id} canManage={isOwner || coaches.some((c) => c.user_id === user.id)} userId={user.id} />}
+
+      <TeamFeed teamId={id} />
 
       <ChatsPanel
         teamId={id}
