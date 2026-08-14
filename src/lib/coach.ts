@@ -124,6 +124,7 @@ export interface AssignInput {
   time_of_day: string
   repeat_days: number[]
   horn_value: number
+  forfeit?: string | null
 }
 
 /** Assign to one client, or the whole team when clientId is null. */
@@ -140,6 +141,7 @@ export async function assignTask(
     p_time: input.time_of_day,
     p_repeat: input.repeat_days,
     p_horns: input.horn_value,
+    p_forfeit: input.forfeit ?? null,
   })
   if (error) throw error
   return (data as number) ?? 0

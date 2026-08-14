@@ -210,6 +210,7 @@ function AssignPanel({
   const [time, setTime] = useState('08:00')
   const [days, setDays] = useState<number[]>([])
   const [horns, setHorns] = useState(10)
+  const [forfeit, setForfeit] = useState('')
   const [target, setTarget] = useState<string>('all')
 
   function toggleDay(d: number) {
@@ -222,10 +223,12 @@ function AssignPanel({
     try {
       const n = await assignTask(teamId, target === 'all' ? null : target, {
         title: title.trim(), category, time_of_day: time, repeat_days: days, horn_value: horns,
+        forfeit: forfeit.trim() || null,
       })
       showToast(`Assigned to ${n} client${n === 1 ? '' : 's'} 💪`, '✅')
       setTitle('')
       setDays([])
+      setForfeit('')
       setOpen(false)
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Could not assign.'
@@ -288,6 +291,16 @@ function AssignPanel({
           <div className="field">
             <label>Horns for finishing: {horns}</label>
             <input type="range" min={0} max={50} step={5} value={horns} onChange={(e) => setHorns(Number(e.target.value))} />
+          </div>
+          <div className="field">
+            <label>Forfeit if they miss (optional)</label>
+            <input
+              className="input"
+              value={forfeit}
+              maxLength={120}
+              onChange={(e) => setForfeit(e.target.value)}
+              placeholder="e.g. extra session, or 50 burpees"
+            />
           </div>
           <button className="btn btn-primary" disabled={busy} onClick={submit}>Assign</button>
         </div>

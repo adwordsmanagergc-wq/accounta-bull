@@ -24,6 +24,7 @@ type Profile = { id: string; name: string | null; timezone: string | null; horns
 type Goal = {
   id: string; user_id: string; title: string; time_of_day: string; repeat_days: number[]
   active: boolean; stake_horns: number; forfeit: string | null; notify_herd: boolean
+  team_id: string | null
 }
 type Sub = { id: string; user_id: string; endpoint: string; p256dh: string; auth: string }
 
@@ -45,8 +46,8 @@ Deno.serve(async (req) => {
 
   const [{ data: profiles }, { data: goals }] = await Promise.all([
     admin.from('profiles').select('id, name, timezone, horns'),
-    admin.from('goals').select('id, user_id, title, time_of_day, repeat_days, active, stake_horns, forfeit, notify_herd')
-      .eq('active', true).gt('stake_horns', 0),
+    admin.from('goals').select('id, user_id, title, time_of_day, repeat_days, active, stake_horns, forfeit, notify_herd, team_id')
+      .eq('active', true).or('stake_horns.gt.0,forfeit.not.is.null'),
   ])
 
   const profById = new Map<string, Profile>()
@@ -108,32 +109,54 @@ Deno.serve(async (req) => {
       if (profById.get(userId)) profById.get(userId)!.horns = next
       hornsDocked += current - next
 
-      if (!g.notify_herd) continue
-
-      // Push the forfeit to the user's herd-mates.
-      if (herdSubs === null) {
-        const { data: conns } = await admin
-          .from('herd_connections')
-          .select('user_low, user_high')
-          .or(`user_low.eq.${userId},user_high.eq.${userId}`)
-        const mateIds = ((conns as { user_low: string; user_high: string }[]) ?? [])
-          .map((c) => (c.user_low === userId ? c.user_high : c.user_low))
-        if (mateIds.length === 0) {
-          herdSubs = []
-        } else {
-          const { data: s } = await admin.from('push_subscriptions').select('*').in('user_id', mateIds)
-          herdSubs = (s as Sub[]) ?? []
+      // Who hears about the miss? Coach-assigned goals (team_id) tell the
+      // team's coaches; personal goals tell the herd if opted in.
+      let recipients: Sub[] = []
+      let url = '/#/today'
+      if (g.team_id) {
+        const { data: coaches } = await admin
+          .from('team_members')
+          .select('user_id')
+          .eq('team_id', g.team_id)
+          .eq('status', 'active')
+          .in('role', ['owner', 'coach'])
+        const ids = ((coaches as { user_id: string }[]) ?? [])
+          .map((c) => c.user_id)
+          .filter((id) => id !== userId)
+        if (ids.length) {
+          const { data } = await admin.from('push_subscriptions').select('*').in('user_id', ids)
+          recipients = (data as Sub[]) ?? []
         }
+        url = '/#/coach'
+      } else if (g.notify_herd) {
+        if (herdSubs === null) {
+          const { data: conns } = await admin
+            .from('herd_connections')
+            .select('user_low, user_high')
+            .or(`user_low.eq.${userId},user_high.eq.${userId}`)
+          const mateIds = ((conns as { user_low: string; user_high: string }[]) ?? [])
+            .map((c) => (c.user_low === userId ? c.user_high : c.user_low))
+          if (mateIds.length === 0) {
+            herdSubs = []
+          } else {
+            const { data: s } = await admin.from('push_subscriptions').select('*').in('user_id', mateIds)
+            herdSubs = (s as Sub[]) ?? []
+          }
+        }
+        recipients = herdSubs
+        url = '/#/herd'
       }
-      const who = prof?.name?.trim() || 'Someone in your herd'
+      if (recipients.length === 0) continue
+
+      const who = prof?.name?.trim() || 'Someone'
       const payload = JSON.stringify({
-        title: '🐂 Herd miss',
+        title: '🐂 Missed goal',
         body: `${who} missed "${g.title}".${g.forfeit ? ` Forfeit: ${g.forfeit}` : ''}`,
-        url: '/#/herd',
+        url,
         icon: '/icon-192.png',
         tag: `stake-${g.id}-${yDate}`,
       })
-      for (const sub of herdSubs) {
+      for (const sub of recipients) {
         try {
           await webpush.sendNotification({ endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } }, payload)
           notified++
