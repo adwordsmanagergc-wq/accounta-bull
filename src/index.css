@@ -1627,3 +1627,27 @@ select {
   border-radius: 10px;
   background: #000;
 }
+
+/* ---------- Stakes ---------- */
+.stake-box {
+  border: 1px dashed var(--border-strong);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 16px;
+  background: rgba(245, 130, 31, 0.06);
+}
+.stake-amount {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--orange);
+}
+.stake-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: rgba(245, 130, 31, 0.16);
+  color: var(--orange);
+  font-size: 11px;
+  font-weight: 700;
+}

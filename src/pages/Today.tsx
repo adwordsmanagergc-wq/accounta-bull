@@ -211,6 +211,7 @@ export default function Today() {
                       <div className="goal-title">{g.title}</div>
                       <div className="goal-meta">
                         {whenLabel(g)} · {g.horn_value} horns
+                        {g.stake_horns > 0 && <span className="stake-tag">⚡ {g.stake_horns} at stake</span>}
                       </div>
                     </div>
                     <span className="cat-chip">

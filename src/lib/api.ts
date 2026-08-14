@@ -108,6 +108,9 @@ export async function saveGoal(
     repeat_days: goal.repeat_days,
     horn_value: goal.horn_value ?? 10,
     active: goal.active ?? true,
+    stake_horns: goal.stake_horns ?? 0,
+    forfeit: goal.forfeit ?? null,
+    notify_herd: goal.notify_herd ?? false,
   }
   if (goal.id) {
     const { error } = await supabase.from('goals').update(payload).eq('id', goal.id)

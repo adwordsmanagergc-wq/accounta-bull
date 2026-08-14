@@ -161,6 +161,9 @@ export interface Goal {
   repeat_days: number[] // subset of 0..6
   horn_value: number
   active: boolean
+  stake_horns: number
+  forfeit: string | null
+  notify_herd: boolean
   created_at: string
 }
 

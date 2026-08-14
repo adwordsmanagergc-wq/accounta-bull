@@ -17,6 +17,9 @@ export default function GoalEdit() {
   const [time, setTime] = useState('08:00')
   const [days, setDays] = useState<number[]>([1, 2, 3, 4, 5])
   const [horns, setHorns] = useState(10)
+  const [stakeHorns, setStakeHorns] = useState(0)
+  const [forfeit, setForfeit] = useState('')
+  const [notifyHerd, setNotifyHerd] = useState(false)
   const [loading, setLoading] = useState(editing)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -31,6 +34,9 @@ export default function GoalEdit() {
         setTime(g.time_of_day.slice(0, 5))
         setDays(g.repeat_days)
         setHorns(g.horn_value)
+        setStakeHorns(g.stake_horns ?? 0)
+        setForfeit(g.forfeit ?? '')
+        setNotifyHerd(g.notify_herd ?? false)
       }
       setLoading(false)
     })
@@ -59,6 +65,9 @@ export default function GoalEdit() {
         repeat_days: days,
         horn_value: horns,
         active: true,
+        stake_horns: stakeHorns,
+        forfeit: stakeHorns > 0 ? forfeit.trim() || null : null,
+        notify_herd: stakeHorns > 0 ? notifyHerd : false,
       } as Partial<Goal> & { id?: string })
       showToast(editing ? 'Goal updated' : 'Goal added 🎯', '✅')
       navigate('/today')
@@ -168,6 +177,46 @@ export default function GoalEdit() {
             <option value={20}>20, tough</option>
             <option value={30}>30, big win</option>
           </select>
+        </div>
+
+        <div className="stake-box">
+          <div className="row between">
+            <div>
+              <div style={{ fontWeight: 700 }}>⚡ Put horns on the line</div>
+              <div className="faint" style={{ fontSize: 12 }}>
+                Miss this goal and you lose these horns. Real stakes.
+              </div>
+            </div>
+            <div className="stake-amount">{stakeHorns > 0 ? `-${stakeHorns}` : 'Off'}</div>
+          </div>
+          <input
+            type="range"
+            min={0}
+            max={50}
+            step={5}
+            value={stakeHorns}
+            onChange={(e) => setStakeHorns(Number(e.target.value))}
+            style={{ width: '100%', marginTop: 10 }}
+          />
+          {stakeHorns > 0 && (
+            <>
+              <div className="field" style={{ marginTop: 10 }}>
+                <label htmlFor="forfeit">Forfeit if you miss (optional)</label>
+                <input
+                  id="forfeit"
+                  className="input"
+                  value={forfeit}
+                  maxLength={120}
+                  onChange={(e) => setForfeit(e.target.value)}
+                  placeholder="e.g. 20 burpees, or coffee is on me"
+                />
+              </div>
+              <label className="row between" style={{ cursor: 'pointer' }}>
+                <span className="muted" style={{ fontSize: 13 }}>Tell my herd if I miss</span>
+                <input type="checkbox" checked={notifyHerd} onChange={(e) => setNotifyHerd(e.target.checked)} />
+              </label>
+            </>
+          )}
         </div>
 
         <button className="btn btn-primary" disabled={saving} type="submit">
