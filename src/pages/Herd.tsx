@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { appUrl } from '../lib/supabase'
 import Avatar from '../components/Avatar'
+import { getOrCreateDm } from '../lib/chat'
 import {
   acceptInvite,
   checkinToday,
@@ -386,6 +387,7 @@ function PartnerBlock({
   onChanged: () => void | Promise<void>
 }) {
   const { showToast } = useToast()
+  const navigate = useNavigate()
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
   const [reward, setReward] = useState('')
@@ -534,6 +536,15 @@ function PartnerBlock({
             🏆 {partner.horns} horns · {partner.streak}🔥 streak
           </div>
         </div>
+        <button
+          className="btn btn-ghost btn-sm"
+          onClick={async () => {
+            try { navigate(`/chat/${await getOrCreateDm(partner.userId)}`) }
+            catch { showToast('Could not open chat.', '⚠️') }
+          }}
+        >
+          💬 Message
+        </button>
       </div>
 
       <div className="stack">

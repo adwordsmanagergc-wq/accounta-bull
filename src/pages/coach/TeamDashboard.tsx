@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import Avatar from '../../components/Avatar'
 import GroupTasks from '../../components/GroupTasks'
+import { createTeamChat, fetchTeamChats, getOrCreateDm, type Conversation } from '../../lib/chat'
 import {
   addCoachByUsername,
   assignTask,
@@ -100,6 +101,14 @@ export default function TeamDashboard() {
 
       {user && <GroupTasks teamId={id} canManage={isOwner || coaches.some((c) => c.user_id === user.id)} userId={user.id} />}
 
+      <ChatsPanel
+        teamId={id}
+        canManage={isOwner || coaches.some((c) => c.user_id === user?.id)}
+        clients={clients}
+        busy={busy}
+        setBusy={setBusy}
+      />
+
       <div className="section-label">Clients</div>
       {loaded && clients.length === 0 && <div className="muted" style={{ marginBottom: 12 }}>No clients yet. Share an invite code above.</div>}
       {clients.map((m) => (
@@ -111,6 +120,20 @@ export default function TeamDashboard() {
               <div className="goal-meta">🔥 {m.profile?.streak ?? 0} · 🏆 {m.profile?.horns ?? 0}</div>
             </div>
             <span className="muted">›</span>
+          </button>
+          <button
+            className="link-btn"
+            title="Message"
+            disabled={busy}
+            style={{ fontSize: 18, padding: '0 4px' }}
+            onClick={async () => {
+              setBusy(true)
+              try { navigate(`/chat/${await getOrCreateDm(m.user_id)}`) }
+              catch { showToast('Could not open chat.', '⚠️') }
+              finally { setBusy(false) }
+            }}
+          >
+            💬
           </button>
           <button
             className="link-btn tiny-danger"
@@ -390,6 +413,87 @@ function AddCoachPanel({
           <button className="btn btn-ghost btn-join" disabled={busy} onClick={add}>Invite</button>
         </div>
       </div>
+    </div>
+  )
+}
+
+function ChatsPanel({
+  teamId, canManage, clients, busy, setBusy,
+}: {
+  teamId: string; canManage: boolean; clients: TeamMemberWithProfile[]; busy: boolean; setBusy: (b: boolean) => void
+}) {
+  const { showToast } = useToast()
+  const navigate = useNavigate()
+  const [chats, setChats] = useState<Conversation[]>([])
+  const [open, setOpen] = useState(false)
+  const [title, setTitle] = useState('')
+  const [all, setAll] = useState(true)
+  const [picked, setPicked] = useState<Set<string>>(new Set())
+
+  const load = useCallback(async () => {
+    try { setChats(await fetchTeamChats(teamId)) } catch (e) { console.error(e) }
+  }, [teamId])
+  useEffect(() => { load() }, [load])
+
+  function toggle(uid: string) {
+    setPicked((s) => {
+      const n = new Set(s)
+      if (n.has(uid)) n.delete(uid); else n.add(uid)
+      return n
+    })
+  }
+
+  async function create() {
+    if (!title.trim() || busy) return
+    setBusy(true)
+    try {
+      const convId = await createTeamChat(teamId, title.trim(), all ? [] : Array.from(picked), all)
+      setTitle(''); setPicked(new Set()); setAll(true); setOpen(false)
+      await load()
+      navigate(`/chat/${convId}`)
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Could not create chat.'
+      showToast(msg, '⚠️')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="card" style={{ marginBottom: 14 }}>
+      <div className="row between" style={{ marginBottom: 8 }}>
+        <span style={{ fontWeight: 700 }}>Chats</span>
+        {canManage && <button className="link-btn" onClick={() => setOpen((o) => !o)}>{open ? '−' : '+ New chat'}</button>}
+      </div>
+
+      {canManage && open && (
+        <div className="stack" style={{ marginBottom: 12 }}>
+          <input className="input" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Chat name, e.g. Monday crew" />
+          <label className="row between" style={{ cursor: 'pointer' }}>
+            <span className="muted" style={{ fontSize: 13 }}>Include all team members</span>
+            <input type="checkbox" checked={all} onChange={(e) => setAll(e.target.checked)} />
+          </label>
+          {!all && (
+            <div className="stack" style={{ gap: 6 }}>
+              {clients.map((c) => (
+                <label key={c.user_id} className="row between" style={{ cursor: 'pointer' }}>
+                  <span style={{ fontSize: 14 }}>{c.profile?.name || c.profile?.username || 'Client'}</span>
+                  <input type="checkbox" checked={picked.has(c.user_id)} onChange={() => toggle(c.user_id)} />
+                </label>
+              ))}
+            </div>
+          )}
+          <button className="btn btn-primary btn-sm" disabled={busy} onClick={create}>Create chat</button>
+        </div>
+      )}
+
+      {chats.length === 0 && <div className="muted" style={{ fontSize: 13 }}>No chats yet.</div>}
+      {chats.map((c) => (
+        <button key={c.id} className="chat-row" onClick={() => navigate(`/chat/${c.id}`)}>
+          <span>💬 {c.title || 'Team chat'}</span>
+          <span className="muted">›</span>
+        </button>
+      ))}
     </div>
   )
 }
