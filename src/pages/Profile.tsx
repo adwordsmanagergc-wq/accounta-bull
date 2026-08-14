@@ -7,6 +7,7 @@ import Achievements from '../components/Achievements'
 import { notificationPermission, notificationsSupported } from '../lib/notify'
 import { enablePush, pushConfigured, pushSupported, sendTestPush } from '../lib/push'
 import { uploadAvatar } from '../lib/storage'
+import { compressImage } from '../lib/media'
 import { supabase } from '../lib/supabase'
 import { TONES, type BoostTone } from '../lib/types'
 
@@ -71,7 +72,7 @@ export default function Profile() {
     if (!file || !user) return
     setUploading(true)
     try {
-      const url = await uploadAvatar(user.id, file)
+      const url = await uploadAvatar(user.id, await compressImage(file))
       const { error } = await supabase.from('profiles').update({ avatar_url: url }).eq('id', user.id)
       if (error) throw error
       await refreshProfile()

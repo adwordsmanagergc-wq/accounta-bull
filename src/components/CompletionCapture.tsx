@@ -3,6 +3,7 @@ import { useToast } from '../context/ToastContext'
 import { addProgressPhoto } from '../lib/progress'
 import { addJournalMedia, todayDate } from '../lib/journal'
 import { mediaKind, uploadProgressPhoto } from '../lib/storage'
+import { MAX_VIDEO_SECONDS, prepareUpload } from '../lib/media'
 import type { Goal } from '../lib/types'
 
 /** After a task is completed, offer to attach a photo/video to Progress or Journal. */
@@ -22,11 +23,25 @@ export default function CompletionCapture({
   const [dest, setDest] = useState<'progress' | 'journal'>('progress')
   const [note, setNote] = useState('')
   const [busy, setBusy] = useState(false)
+  const [preparing, setPreparing] = useState(false)
 
-  function pick(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null
-    setFile(f)
-    setPreview(f ? URL.createObjectURL(f) : null)
+  async function pick(e: React.ChangeEvent<HTMLInputElement>) {
+    const raw = e.target.files?.[0] ?? null
+    e.target.value = ''
+    if (!raw) return
+    setPreview(URL.createObjectURL(raw))
+    setPreparing(true)
+    try {
+      // Compress images; enforce the video length + size limits.
+      const prepared = await prepareUpload(raw)
+      setFile(prepared)
+    } catch (err) {
+      setFile(null)
+      setPreview(null)
+      showToast(err instanceof Error ? err.message : 'Could not use that file.', '⚠️')
+    } finally {
+      setPreparing(false)
+    }
   }
 
   async function save() {
@@ -64,10 +79,15 @@ export default function CompletionCapture({
       <div className="modal-card" onClick={(e) => e.stopPropagation()}>
         <div className="modal-title">Nice work! 🐂</div>
         <div className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
-          Capture the moment from “{goal.title}”. Add a photo or video (optional).
+          Capture the moment from “{goal.title}”. Add a photo or video up to {MAX_VIDEO_SECONDS}s (optional).
         </div>
 
-        {!file ? (
+        {preparing ? (
+          <div className="center" style={{ padding: '10px 0' }}>
+            <div className="spinner" style={{ margin: '0 auto 8px' }} />
+            <div className="muted" style={{ fontSize: 13 }}>Optimizing…</div>
+          </div>
+        ) : !file ? (
           <button className="btn btn-ghost" onClick={() => fileRef.current?.click()}>
             📷 Choose photo or video
           </button>

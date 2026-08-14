@@ -9,6 +9,7 @@ import {
   setPhotoShared,
 } from '../lib/progress'
 import { signedProgressUrl, uploadProgressPhoto } from '../lib/storage'
+import { compressImage } from '../lib/media'
 import {
   addMeasurement,
   fetchMeasurements,
@@ -112,7 +113,7 @@ export default function Progress() {
     if (!file || !user) return
     setUploading(true)
     try {
-      const path = await uploadProgressPhoto(user.id, file)
+      const path = await uploadProgressPhoto(user.id, await compressImage(file))
       await addProgressPhoto(user.id, { phase, storage_path: path, taken_on: takenOn, note })
       setNote('')
       showToast('Photo added 📸', '✅')

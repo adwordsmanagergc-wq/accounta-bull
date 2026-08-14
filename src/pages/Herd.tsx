@@ -19,6 +19,7 @@ import {
   type Cheer,
 } from '../lib/herd'
 import { uploadHerdPhoto, signedProgressUrl } from '../lib/storage'
+import { compressImage } from '../lib/media'
 import { fetchHerdSharedPhotos } from '../lib/progress'
 import { fetchHerdSharedTargets, targetPercent, daysLeft, type ProgressTarget } from '../lib/targets'
 import { addFeedback, fetchFeedback, type PhotoFeedback } from '../lib/feedback'
@@ -453,7 +454,7 @@ function PartnerBlock({
     if (!file) return
     setSavingHerd(true)
     try {
-      const url = await uploadHerdPhoto(me.id, partner.connectionId, file)
+      const url = await uploadHerdPhoto(me.id, partner.connectionId, await compressImage(file))
       await updateHerd(partner.connectionId, { photo_url: url })
       showToast('Herd photo updated 📸', '✅')
       await onChanged()

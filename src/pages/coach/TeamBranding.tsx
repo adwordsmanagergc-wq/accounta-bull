@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { fetchTeam, updateTeamBranding, uploadTeamLogo } from '../../lib/coach'
+import { compressImage } from '../../lib/media'
 import { TEAM_GRADIENTS } from '../../lib/types'
 
 export default function TeamBranding() {
@@ -48,7 +49,7 @@ export default function TeamBranding() {
     if (!file || !user) return
     setBusy(true)
     try {
-      const url = await uploadTeamLogo(user.id, id, file)
+      const url = await uploadTeamLogo(user.id, id, await compressImage(file))
       await updateTeamBranding(id, { logo_url: url })
       setLogo(url)
       showToast('Logo updated 🖼️', '✅')
