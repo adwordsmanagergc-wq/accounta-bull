@@ -14,6 +14,7 @@ import Herd from './pages/Herd'
 import Progress from './pages/Progress'
 import Rewards from './pages/Rewards'
 import Journal from './pages/Journal'
+import Feed from './pages/Feed'
 import ChatRoom from './pages/ChatRoom'
 import JoinTeam from './pages/JoinTeam'
 import CoachHome from './pages/coach/CoachHome'
@@ -62,6 +63,7 @@ function AppLayout() {
         <Route path="/progress" element={<Progress />} />
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/journal" element={<Journal />} />
+        <Route path="/feed" element={<Feed />} />
         <Route path="/chat/:id" element={<ChatRoom />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/coach" element={<CoachHome />} />

@@ -34,6 +34,16 @@ export function mediaKind(file: File): 'image' | 'video' {
   return file.type.startsWith('video') ? 'video' : 'image'
 }
 
+/** Upload feed media to the PUBLIC avatars bucket; returns a public URL. */
+export async function uploadFeedMedia(userId: string, file: File): Promise<string> {
+  const path = `${userId}/feed-${Date.now()}.${ext(file)}`
+  const { error } = await supabase.storage
+    .from('avatars')
+    .upload(path, file, { upsert: true, contentType: file.type })
+  if (error) throw error
+  return supabase.storage.from('avatars').getPublicUrl(path).data.publicUrl
+}
+
 /** Upload a PRIVATE progress photo or video; returns its storage path (sign it to view). */
 export async function uploadProgressPhoto(userId: string, file: File): Promise<string> {
   const path = `${userId}/${crypto.randomUUID()}.${ext(file)}`
