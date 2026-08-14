@@ -1794,3 +1794,15 @@ select {
 .comment-name {
   font-weight: 700;
 }
+
+/* ---------- Unread indicator ---------- */
+.unread-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--orange);
+  margin-left: 4px;
+  vertical-align: middle;
+  box-shadow: 0 0 0 2px rgba(245, 130, 31, 0.25);
+}

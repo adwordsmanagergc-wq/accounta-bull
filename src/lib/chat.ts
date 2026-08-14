@@ -82,3 +82,18 @@ export async function getOrCreateDm(otherUserId: string): Promise<string> {
   if (error) throw error
   return data as string
 }
+
+export async function markConversationRead(convId: string): Promise<void> {
+  try {
+    await supabase.rpc('mark_conversation_read', { p_conv: convId })
+  } catch {
+    /* non-fatal */
+  }
+}
+
+/** Conversation ids with unread messages from others. */
+export async function fetchUnreadConversationIds(): Promise<string[]> {
+  const { data, error } = await supabase.rpc('unread_conversations')
+  if (error) return []
+  return ((data as { conversation_id: string }[]) ?? []).map((r) => r.conversation_id)
+}

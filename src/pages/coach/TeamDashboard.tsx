@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import Avatar from '../../components/Avatar'
 import GroupTasks from '../../components/GroupTasks'
-import { createTeamChat, fetchTeamChats, getOrCreateDm, type Conversation } from '../../lib/chat'
+import { createTeamChat, fetchTeamChats, fetchUnreadConversationIds, getOrCreateDm, type Conversation } from '../../lib/chat'
 import {
   addCoachByUsername,
   assignTask,
@@ -425,13 +425,20 @@ function ChatsPanel({
   const { showToast } = useToast()
   const navigate = useNavigate()
   const [chats, setChats] = useState<Conversation[]>([])
+  const [unread, setUnread] = useState<Set<string>>(new Set())
   const [open, setOpen] = useState(false)
   const [title, setTitle] = useState('')
   const [all, setAll] = useState(true)
   const [picked, setPicked] = useState<Set<string>>(new Set())
 
   const load = useCallback(async () => {
-    try { setChats(await fetchTeamChats(teamId)) } catch (e) { console.error(e) }
+    try {
+      const [cs, un] = await Promise.all([fetchTeamChats(teamId), fetchUnreadConversationIds()])
+      setChats(cs)
+      setUnread(new Set(un))
+    } catch (e) {
+      console.error(e)
+    }
   }, [teamId])
   useEffect(() => { load() }, [load])
 
@@ -490,7 +497,7 @@ function ChatsPanel({
       {chats.length === 0 && <div className="muted" style={{ fontSize: 13 }}>No chats yet.</div>}
       {chats.map((c) => (
         <button key={c.id} className="chat-row" onClick={() => navigate(`/chat/${c.id}`)}>
-          <span>💬 {c.title || 'Team chat'}</span>
+          <span>💬 {c.title || 'Team chat'}{unread.has(c.id) && <span className="unread-dot" />}</span>
           <span className="muted">›</span>
         </button>
       ))}

@@ -6,6 +6,7 @@ import {
   fetchConversation,
   fetchMemberIds,
   fetchMessages,
+  markConversationRead,
   sendMessage,
   type Conversation,
   type Message,
@@ -31,6 +32,7 @@ export default function ChatRoom() {
   const loadMessages = useCallback(async () => {
     try {
       setMessages(await fetchMessages(id))
+      markConversationRead(id)
     } catch (e) {
       console.error(e)
     }

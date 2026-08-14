@@ -8,6 +8,8 @@ import { notificationPermission, notificationsSupported } from '../lib/notify'
 import { enablePush, pushConfigured, pushSupported, sendTestPush } from '../lib/push'
 import { uploadAvatar } from '../lib/storage'
 import { compressImage } from '../lib/media'
+import { fetchFeed } from '../lib/feed'
+import { fetchUnreadConversationIds } from '../lib/chat'
 import { supabase } from '../lib/supabase'
 import { TONES, type BoostTone } from '../lib/types'
 
@@ -21,7 +23,26 @@ export default function Profile() {
   const fileRef = useRef<HTMLInputElement>(null)
   const [editingBio, setEditingBio] = useState(false)
   const [bio, setBio] = useState(profile?.bio ?? '')
+  const [newFeed, setNewFeed] = useState(false)
+  const [unreadChat, setUnreadChat] = useState(false)
   const tone: BoostTone = profile?.boost_tone ?? 'medium'
+
+  useEffect(() => {
+    let alive = true
+    ;(async () => {
+      try {
+        const [posts, unread] = await Promise.all([fetchFeed(10), fetchUnreadConversationIds()])
+        if (!alive) return
+        let seen = ''
+        try { seen = localStorage.getItem('feed_seen_at') ?? '' } catch { /* ignore */ }
+        setNewFeed(posts.some((p) => p.user_id !== user?.id && p.created_at > seen))
+        setUnreadChat(unread.length > 0)
+      } catch {
+        /* non-fatal */
+      }
+    })()
+    return () => { alive = false }
+  }, [user?.id])
 
   async function saveTone(next: BoostTone) {
     if (!user || next === tone) return
@@ -213,11 +234,11 @@ export default function Profile() {
           📔 Journal
         </Link>
         <Link to="/coach" className="btn btn-ghost" style={{ flex: 1 }}>
-          🧑‍🏫 Coach / Teams
+          🧑‍🏫 Coach / Teams {unreadChat && <span className="unread-dot" />}
         </Link>
       </div>
       <Link to="/feed" className="btn btn-ghost" style={{ marginBottom: 16 }}>
-        📣 Feed
+        📣 Feed {newFeed && <span className="unread-dot" />}
       </Link>
 
       <div className="stat-grid" style={{ marginBottom: 16 }}>

@@ -58,6 +58,12 @@ export default function Feed() {
       setComments(grouped)
       setCheers(ch)
       setAuthors(await fetchAuthors([...p.map((x) => x.user_id), ...cs.map((c) => c.user_id)]))
+      // Mark the feed seen up to the newest post, so Profile's "new" dot clears.
+      try {
+        localStorage.setItem('feed_seen_at', p[0]?.created_at ?? new Date().toISOString())
+      } catch {
+        /* ignore */
+      }
     } catch (e) {
       console.error(e)
     } finally {
