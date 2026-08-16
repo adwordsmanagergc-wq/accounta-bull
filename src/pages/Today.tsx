@@ -205,7 +205,7 @@ export default function Today() {
               const done = !!completions[g.id]
               const cat = catOf(g)
               return (
-                <div className={`card goal-card ${done ? 'goal-done' : ''}`} key={g.id}>
+                <div className={`card goal-card ${done ? 'goal-done' : ''}`} data-cat={g.category} key={g.id}>
                   <div className="goal-top">
                     <div>
                       <div className="goal-title">{g.title}</div>

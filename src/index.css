@@ -39,6 +39,35 @@
   box-sizing: border-box;
 }
 
+/* Kill the grey tap flash on mobile for a native, premium touch feel. */
+a,
+button,
+.btn,
+.chip-btn,
+.tone-option,
+.cheer-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgba(245, 130, 31, 0.32);
+  color: #fff;
+}
+
+/* Slim, branded scrollbars. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 169, 106, 0.35) transparent;
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 106, 0.3);
+  border-radius: 999px;
+}
+
 html,
 body,
 #root {
@@ -115,7 +144,7 @@ select {
   transition: transform 0.06s ease, filter 0.15s ease, background 0.15s ease;
 }
 .btn:active {
-  transform: translateY(1px);
+  transform: translateY(1px) scale(0.985);
 }
 .btn:disabled {
   opacity: 0.6;
@@ -543,7 +572,35 @@ select {
 
 /* ---------- Goal cards ---------- */
 .goal-card {
-  padding: 15px 16px;
+  padding: 15px 16px 15px 19px;
+  position: relative;
+  overflow: hidden;
+}
+/* Category-tinted accent stripe down the left edge. */
+.goal-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--gold);
+  opacity: 0.9;
+}
+.goal-card[data-cat='fitness']::before {
+  background: linear-gradient(180deg, #ff9a3d, #f5821f);
+}
+.goal-card[data-cat='work']::before {
+  background: linear-gradient(180deg, #4f9dff, #2f6fd6);
+}
+.goal-card[data-cat='mind']::before {
+  background: linear-gradient(180deg, #b98cff, #7d4fe0);
+}
+.goal-card[data-cat='other']::before {
+  background: linear-gradient(180deg, #ffd774, #c9a96a);
+}
+.goal-card.goal-done::before {
+  background: linear-gradient(180deg, #3ecf8e, #2aa26e);
 }
 .goal-top {
   display: flex;
@@ -562,11 +619,13 @@ select {
 }
 .cat-chip {
   font-size: 12px;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 999px;
   border: 1px solid var(--border-strong);
   color: var(--gold);
   white-space: nowrap;
+  background: rgba(201, 169, 106, 0.08);
+  box-shadow: var(--sheen);
 }
 .goal-actions {
   display: flex;
@@ -587,6 +646,7 @@ select {
   border-radius: 999px;
   background: linear-gradient(90deg, var(--gold), var(--orange));
   transition: width 0.4s ease;
+  box-shadow: 0 0 12px rgba(245, 130, 31, 0.45);
 }
 
 .done-check {
@@ -597,12 +657,41 @@ select {
 
 /* Charge-call banner */
 .charge-banner {
-  background: linear-gradient(135deg, #f5821f 0%, #d96f12 100%);
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ff9a3d 0%, #f5821f 45%, #d96f12 100%);
   color: #17110a;
   border-radius: var(--radius);
   padding: 16px 18px;
   margin-bottom: 18px;
-  box-shadow: 0 14px 30px rgba(245, 130, 31, 0.3);
+  box-shadow: 0 16px 34px rgba(245, 130, 31, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+/* Slow diagonal shine sweeping across, so the call to action feels alive. */
+.charge-banner::after {
+  content: '';
+  position: absolute;
+  top: -60%;
+  left: -30%;
+  width: 40%;
+  height: 220%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: rotate(18deg);
+  animation: banner-shine 4.5s ease-in-out infinite;
+}
+@keyframes banner-shine {
+  0% {
+    left: -40%;
+  }
+  55%,
+  100% {
+    left: 130%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .charge-banner::after {
+    animation: none;
+    display: none;
+  }
 }
 .charge-banner .cb-kicker {
   font-family: var(--font-display);
@@ -696,6 +785,7 @@ select {
   min-height: 180px;
   display: grid;
   place-items: center;
+  box-shadow: var(--shadow), var(--sheen), 0 0 40px rgba(245, 130, 31, 0.1);
 }
 
 /* Stats */
@@ -707,6 +797,22 @@ select {
 .stat {
   text-align: center;
   padding: 20px 12px;
+  position: relative;
+  overflow: hidden;
+}
+/* Faint warm wash rising from the base of each stat tile. */
+.stat::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 60%;
+  background: radial-gradient(120% 80% at 50% 100%, rgba(245, 130, 31, 0.12), transparent 70%);
+  pointer-events: none;
+}
+.stat > * {
+  position: relative;
 }
 .stat .stat-num {
   font-family: var(--font-display);
@@ -727,6 +833,7 @@ select {
 .empty .empty-emoji {
   font-size: 44px;
   margin-bottom: 8px;
+  filter: drop-shadow(0 8px 18px rgba(245, 130, 31, 0.28));
 }
 
 /* ---------- Today: date / summary / welcome ---------- */
