@@ -4,6 +4,7 @@ import { useToast } from '../context/ToastContext'
 import Avatar from './Avatar'
 import { prepareUpload } from '../lib/media'
 import { uploadFeedMedia } from '../lib/storage'
+import { tapHaptic } from '../lib/haptics'
 import {
   addComment,
   createPost,
@@ -111,6 +112,7 @@ export default function TeamFeed({ teamId }: { teamId: string }) {
 
   async function cheer(p: Post) {
     if (!user) return
+    tapHaptic()
     const cur = cheers[p.id] ?? { count: 0, mine: false }
     setCheers((c) => ({ ...c, [p.id]: { count: cur.count + (cur.mine ? -1 : 1), mine: !cur.mine } }))
     try {

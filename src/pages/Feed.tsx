@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import Avatar from '../components/Avatar'
 import { prepareUpload } from '../lib/media'
+import { tapHaptic } from '../lib/haptics'
 import { uploadFeedMedia } from '../lib/storage'
 import {
   addComment,
@@ -119,6 +120,7 @@ export default function Feed() {
 
   async function cheer(p: Post) {
     if (!user) return
+    tapHaptic()
     const cur = cheers[p.id] ?? { count: 0, mine: false }
     // optimistic
     setCheers((c) => ({ ...c, [p.id]: { count: cur.count + (cur.mine ? -1 : 1), mine: !cur.mine } }))

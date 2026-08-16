@@ -2,6 +2,9 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import Logo from '../components/Logo'
 import CompletionCapture from '../components/CompletionCapture'
+import Celebration from '../components/Celebration'
+import CountUp from '../components/CountUp'
+import { successHaptic, errorHaptic } from '../lib/haptics'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { completeGoal, fetchGoals, fetchTodayCompletions } from '../lib/api'
@@ -37,6 +40,7 @@ export default function Today() {
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState<string | null>(null)
   const [capture, setCapture] = useState<Goal | null>(null)
+  const [celebrate, setCelebrate] = useState(false)
   // Re-render each minute so meters/labels stay live.
   const [, setTick] = useState(0)
 
@@ -104,9 +108,13 @@ export default function Today() {
           completed_at: new Date().toISOString(),
         },
       }))
+      successHaptic()
+      setCelebrate(true)
       showToast(`+${goal.horn_value} horns! Total ${newTotal} 🏆`, '🐂')
-      setCapture(goal)
+      // Let the burst breathe for a moment before the capture modal opens.
+      window.setTimeout(() => setCapture(goal), 850)
     } catch (e) {
+      errorHaptic()
       showToast('Could not save, try again.', '⚠️')
       console.error(e)
     } finally {
@@ -130,7 +138,7 @@ export default function Today() {
           <h1>Today</h1>
           <div className="today-date">{todayDate}</div>
         </div>
-        <div className="pill">🏆 {profile?.horns ?? 0}</div>
+        <div className="pill">🏆 <CountUp value={profile?.horns ?? 0} /></div>
       </div>
 
       {error && (
@@ -271,6 +279,8 @@ export default function Today() {
           </div>
         </>
       )}
+
+      {celebrate && <Celebration onDone={() => setCelebrate(false)} />}
 
       {capture && user && (
         <CompletionCapture goal={capture} userId={user.id} onClose={() => setCapture(null)} />

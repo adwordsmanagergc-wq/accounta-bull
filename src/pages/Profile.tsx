@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import Avatar from '../components/Avatar'
 import Achievements from '../components/Achievements'
+import CountUp from '../components/CountUp'
 import { notificationPermission, notificationsSupported } from '../lib/notify'
 import { enablePush, pushConfigured, pushSupported, sendTestPush } from '../lib/push'
 import { uploadAvatar } from '../lib/storage'
@@ -243,11 +244,11 @@ export default function Profile() {
 
       <div className="stat-grid" style={{ marginBottom: 16 }}>
         <div className="card stat">
-          <div className="stat-num">{profile?.streak ?? 0}🔥</div>
+          <div className="stat-num"><CountUp value={profile?.streak ?? 0} />🔥</div>
           <div className="stat-label">Day streak</div>
         </div>
         <div className="card stat">
-          <div className="stat-num">{profile?.horns ?? 0}</div>
+          <div className="stat-num"><CountUp value={profile?.horns ?? 0} /></div>
           <div className="stat-label">Total horns 🏆</div>
         </div>
       </div>

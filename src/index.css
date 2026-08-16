@@ -1670,15 +1670,24 @@ select {
 .brand-cover {
   position: relative;
   width: 100%;
-  height: 150px;
-  border-radius: 16px;
+  height: 200px;
+  border-radius: 20px;
   overflow: hidden;
   margin-bottom: 18px;
   background-color: var(--navy-600);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow), var(--sheen);
+}
+/* Cinematic vignette so the logo art has depth and the title reads clearly. */
+.brand-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 80% at 50% 30%, transparent 40%, rgba(6, 14, 26, 0.55) 100%);
+  pointer-events: none;
 }
 .brand-cover.editable {
   cursor: pointer;
@@ -1698,8 +1707,15 @@ select {
   left: 0;
   right: 0;
   bottom: 0;
-  padding: 14px 16px;
-  background: linear-gradient(180deg, transparent 0%, rgba(6, 14, 26, 0.9) 100%);
+  padding: 18px 18px 16px;
+  background: linear-gradient(180deg, transparent 0%, rgba(6, 14, 26, 0.92) 100%);
+  z-index: 1;
+}
+.brand-cover .banner-title {
+  font-size: 26px;
+}
+.brand-cover .brand-btn {
+  z-index: 2;
 }
 .brand-cover .brand-btn {
   position: absolute;
@@ -1944,6 +1960,76 @@ select {
 }
 .comment-name {
   font-weight: 700;
+}
+
+/* ---------- Task-complete celebration ---------- */
+.celebrate {
+  position: fixed;
+  inset: 0;
+  z-index: 90;
+  pointer-events: none;
+  display: grid;
+  place-items: center;
+  transition: opacity 0.25s ease;
+}
+.celebrate-out {
+  opacity: 0;
+}
+/* Expanding gold shockwave ring. */
+.celebrate-ring {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid rgba(245, 130, 31, 0.8);
+  box-shadow: 0 0 40px rgba(245, 130, 31, 0.5);
+  animation: celebrate-ring 0.8s ease-out forwards;
+}
+@keyframes celebrate-ring {
+  0% {
+    transform: scale(0.2);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(7);
+    opacity: 0;
+  }
+}
+.celebrate-burst {
+  position: relative;
+  width: 0;
+  height: 0;
+}
+.celebrate-piece {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -50%);
+  animation: celebrate-fly 1s cubic-bezier(0.15, 0.7, 0.35, 1) forwards;
+  animation-delay: var(--delay);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4));
+  will-change: transform, opacity;
+}
+@keyframes celebrate-fly {
+  0% {
+    transform: translate(-50%, -50%) scale(0.3) rotate(0deg);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(1) rotate(var(--rot));
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .celebrate {
+    display: none;
+  }
 }
 
 /* ---------- Premium polish ---------- */
