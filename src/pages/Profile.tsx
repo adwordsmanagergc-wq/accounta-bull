@@ -238,8 +238,11 @@ export default function Profile() {
           🧑‍🏫 Coach / Teams {unreadChat && <span className="unread-dot" />}
         </Link>
       </div>
-      <Link to="/feed" className="btn btn-ghost" style={{ marginBottom: 16 }}>
+      <Link to="/feed" className="btn btn-ghost" style={{ marginBottom: 10 }}>
         📣 Feed {newFeed && <span className="unread-dot" />}
+      </Link>
+      <Link to="/install" className="btn btn-ghost" style={{ marginBottom: 16 }}>
+        📲 Install app & notifications
       </Link>
 
       <div className="stat-grid" style={{ marginBottom: 16 }}>
@@ -284,6 +287,13 @@ export default function Profile() {
               {busy ? '…' : '🔔 Send a test notification'}
             </button>
           )}
+          <Link
+            to="/install"
+            className="link-btn"
+            style={{ display: 'inline-block', marginTop: 12, fontSize: 13 }}
+          >
+            📲 How to install the app & turn on notifications →
+          </Link>
         </div>
       )}
 

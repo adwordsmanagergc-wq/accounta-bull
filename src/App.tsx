@@ -16,6 +16,7 @@ import Rewards from './pages/Rewards'
 import Journal from './pages/Journal'
 import Feed from './pages/Feed'
 import ChatRoom from './pages/ChatRoom'
+import InstallGuide from './pages/InstallGuide'
 import JoinTeam from './pages/JoinTeam'
 import CoachHome from './pages/coach/CoachHome'
 import TeamDashboard from './pages/coach/TeamDashboard'
@@ -66,6 +67,7 @@ function AppLayout() {
         <Route path="/feed" element={<Feed />} />
         <Route path="/chat/:id" element={<ChatRoom />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/install" element={<InstallGuide />} />
         <Route path="/coach" element={<CoachHome />} />
         <Route path="/coach/team/:id" element={<TeamDashboard />} />
         <Route path="/coach/team/:id/branding" element={<TeamBranding />} />
