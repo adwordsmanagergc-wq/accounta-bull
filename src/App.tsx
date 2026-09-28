@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
 import { useReminders } from './hooks/useReminders'
@@ -6,22 +6,25 @@ import TabBar from './components/TabBar'
 import Landing from './pages/Landing'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
-import Today from './pages/Today'
-import GoalEdit from './pages/GoalEdit'
-import Boost from './pages/Boost'
-import Profile from './pages/Profile'
-import Herd from './pages/Herd'
-import Progress from './pages/Progress'
-import Rewards from './pages/Rewards'
-import Journal from './pages/Journal'
-import Feed from './pages/Feed'
-import ChatRoom from './pages/ChatRoom'
-import InstallGuide from './pages/InstallGuide'
-import JoinTeam from './pages/JoinTeam'
-import CoachHome from './pages/coach/CoachHome'
-import TeamDashboard from './pages/coach/TeamDashboard'
-import ClientDetail from './pages/coach/ClientDetail'
-import TeamBranding from './pages/coach/TeamBranding'
+import { Privacy, Terms } from './pages/Legal'
+
+// Signed-in screens load on demand so the public site stays light.
+const Today = lazy(() => import('./pages/Today'))
+const GoalEdit = lazy(() => import('./pages/GoalEdit'))
+const Boost = lazy(() => import('./pages/Boost'))
+const Profile = lazy(() => import('./pages/Profile'))
+const Herd = lazy(() => import('./pages/Herd'))
+const Progress = lazy(() => import('./pages/Progress'))
+const Rewards = lazy(() => import('./pages/Rewards'))
+const Journal = lazy(() => import('./pages/Journal'))
+const Feed = lazy(() => import('./pages/Feed'))
+const ChatRoom = lazy(() => import('./pages/ChatRoom'))
+const InstallGuide = lazy(() => import('./pages/InstallGuide'))
+const JoinTeam = lazy(() => import('./pages/JoinTeam'))
+const CoachHome = lazy(() => import('./pages/coach/CoachHome'))
+const TeamDashboard = lazy(() => import('./pages/coach/TeamDashboard'))
+const ClientDetail = lazy(() => import('./pages/coach/ClientDetail'))
+const TeamBranding = lazy(() => import('./pages/coach/TeamBranding'))
 
 function Loading() {
   return (
@@ -55,6 +58,8 @@ function AppLayout() {
 
   return (
     <div className="app-shell">
+      {/* Blank while a screen's code loads: pages already fill in without a spinner. */}
+      <Suspense fallback={<div className="page-pad" />}>
       <Routes>
         <Route path="/today" element={<Today />} />
         <Route path="/goal" element={<GoalEdit />} />
@@ -74,6 +79,7 @@ function AppLayout() {
         <Route path="/coach/team/:id/client/:userId" element={<ClientDetail />} />
         <Route path="*" element={<Navigate to="/today" replace />} />
       </Routes>
+      </Suspense>
       <TabBar />
     </div>
   )
@@ -120,7 +126,16 @@ export default function App() {
           </PublicOnly>
         }
       />
-      <Route path="/join/:code" element={<JoinTeam />} />
+      <Route
+        path="/join/:code"
+        element={
+          <Suspense fallback={<Loading />}>
+            <JoinTeam />
+          </Suspense>
+        }
+      />
+      <Route path="/privacy" element={<Privacy />} />
+      <Route path="/terms" element={<Terms />} />
       <Route path="/*" element={<AppLayout />} />
     </Routes>
   )

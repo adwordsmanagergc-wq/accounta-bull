@@ -11,6 +11,7 @@ import {
   type PersonalBoost,
 } from '../lib/boost'
 import { setCommitted, whenLabel } from '../lib/game'
+import { RefreshCw, Zap } from 'lucide-react'
 import type { BoostMessage, Goal } from '../lib/types'
 
 export default function Boost() {
@@ -77,7 +78,7 @@ export default function Boost() {
   function commit() {
     if (!goal) return
     setCommitted(goal.id, true)
-    showToast('You’re charging! Full horns when you finish 🐂', '⚡')
+    showToast('Committed. Full Horns when you finish.', '✅')
     navigate('/today')
   }
 
@@ -97,9 +98,11 @@ export default function Boost() {
   return (
     <div className="boost-screen">
       <div>
-        <div className="boost-kicker">⚡ CHARGE CALL</div>
+        <div className="boost-kicker row" style={{ justifyContent: 'center', gap: 6 }}>
+          <Zap size={16} aria-hidden="true" /> Charge Call
+        </div>
         <h1 className="boost-goal">{goal.title}</h1>
-        <div className="muted" style={{ marginTop: 6 }}>
+        <div className="muted" style={{ marginTop: 8 }}>
           {whenLabel(goal)}
         </div>
       </div>
@@ -107,11 +110,11 @@ export default function Boost() {
       <div className="boost-quote">“{text || 'Show up. That’s the whole game.'}”</div>
 
       <div className="stack">
-        <button className="btn btn-primary" onClick={commit}>
-          I’M CHARGING
+        <button className="btn btn-primary btn-lg" onClick={commit}>
+          I’m on it
         </button>
         <button className="btn btn-ghost" onClick={another}>
-          Another boost
+          <RefreshCw size={16} aria-hidden="true" /> Another boost
         </button>
         <button className="link-btn" style={{ margin: '4px auto 0' }} onClick={() => navigate('/today')}>
           Not now

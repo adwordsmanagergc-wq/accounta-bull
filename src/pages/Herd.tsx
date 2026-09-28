@@ -4,6 +4,22 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { appUrl } from '../lib/supabase'
 import Avatar from '../components/Avatar'
+import {
+  AlertTriangle,
+  Camera,
+  Check,
+  Flag,
+  Flame,
+  Frown,
+  MessageCircle,
+  Plus,
+  ScrollText,
+  Share2,
+  Target,
+  Trash2,
+  Trophy,
+  Users,
+} from 'lucide-react'
 import { getOrCreateDm } from '../lib/chat'
 import {
   acceptInvite,
@@ -96,7 +112,7 @@ export default function Herd() {
     try {
       setInviteCode(await createInvite(user.id))
     } catch (e) {
-      showToast('Could not create invite, try again.', '⚠️')
+      showToast('Couldn’t create an invite. Try again.', '⚠️')
       console.error(e)
     } finally {
       setBusy(false)
@@ -108,7 +124,7 @@ export default function Herd() {
     setBusy(true)
     try {
       await acceptInvite(joinCode)
-      showToast('You’re in the herd! 🐂', '🤝')
+      showToast('You’re in. Welcome to the Herd.', '✅')
       setJoinCode('')
       params.delete('invite')
       setParams(params, { replace: true })
@@ -130,7 +146,7 @@ export default function Herd() {
         await navigator.share({ title: 'Join my herd', text })
       } else {
         await navigator.clipboard.writeText(text)
-        showToast('Invite copied to clipboard 📋', '📋')
+        showToast('Invite copied to clipboard.', '📋')
       }
     } catch {
       /* user dismissed share sheet */
@@ -142,12 +158,18 @@ export default function Herd() {
   return (
     <div className="page-pad">
       <div className="page-head">
-        <h1>Your Herd</h1>
+        <div>
+          <h1>Your Herd</h1>
+          <div className="today-date">The people who keep you honest.</div>
+        </div>
       </div>
 
       {error && (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <p style={{ margin: '0 0 12px' }}>⚠️ {error}</p>
+        <div className="card" style={{ marginBottom: 16 }} role="alert">
+          <div className="row" style={{ alignItems: 'flex-start', marginBottom: 12 }}>
+            <AlertTriangle size={18} aria-hidden="true" style={{ color: 'var(--danger)', flex: '0 0 auto' }} />
+            <p style={{ margin: 0 }}>{error}</p>
+          </div>
           <button className="btn btn-ghost" onClick={load}>
             Try again
           </button>
@@ -156,11 +178,13 @@ export default function Herd() {
 
       {!error && partners.length === 0 && (
         <div className="herd-intro">
-          <div className="welcome-emoji">🤝</div>
-          <h2 className="welcome-title">Chase goals together</h2>
+          <span className="icon-tile lg" aria-hidden="true">
+            <Users size={26} />
+          </span>
+          <h2 className="welcome-title">Goals are easier with a Herd</h2>
           <p className="welcome-sub">
-            Invite a friend to your herd, set shared challenges, and put a reward or forfeit on the
-            line. Friendly competition keeps you both honest.
+            Invite a friend, set a shared challenge and put a reward or a forfeit on the line. A
+            little friendly competition keeps you both honest.
           </p>
         </div>
       )}
@@ -174,15 +198,15 @@ export default function Herd() {
               <>
                 <div className="invite-code">{inviteCode}</div>
                 <button className="btn btn-primary" onClick={() => shareInvite(inviteCode)}>
-                  📤 Share invite
+                  <Share2 size={18} aria-hidden="true" /> Share invite
                 </button>
                 <p className="faint" style={{ fontSize: 12, marginTop: 8 }}>
-                  They enter this code below (or open your link) while signed in.
+                  Your friend enters this code below, or opens your link, while signed in.
                 </p>
               </>
             ) : (
               <button className="btn btn-primary" disabled={busy} onClick={onCreateInvite}>
-                ➕ Create invite code
+                <Plus size={18} aria-hidden="true" /> Create invite code
               </button>
             )}
           </div>
@@ -190,9 +214,12 @@ export default function Herd() {
           <div className="divider">or</div>
 
           <div>
-            <div className="section-label">Have a code?</div>
+            <label className="section-label" htmlFor="join-code" style={{ display: 'block' }}>
+              Have a code?
+            </label>
             <div className="join-row">
               <input
+                id="join-code"
                 className="input"
                 placeholder="Enter invite code"
                 value={joinCode}
@@ -224,7 +251,7 @@ export default function Herd() {
       {sharedTargets.length > 0 && (
         <div style={{ marginTop: 6 }}>
           <div className="steps-heading" style={{ margin: '0 0 10px' }}>
-            🎯 Herd targets
+            <Target size={16} aria-hidden="true" /> Herd targets
           </div>
           <div className="stack">
             {sharedTargets.map((t) => {
@@ -241,7 +268,7 @@ export default function Herd() {
                       {t.current_value} / {t.target_value} {t.unit}
                       {dl != null && dl >= 0 ? ` · ${dl}d left` : ''}
                     </span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--orange)' }}>{pct}%</span>
+                    <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--accent-text)' }}>{pct}%</span>
                   </div>
                 </div>
               )
@@ -253,7 +280,7 @@ export default function Herd() {
       {sharedPhotos.length > 0 && (
         <div style={{ marginTop: 16 }}>
           <div className="steps-heading" style={{ margin: '0 0 10px' }}>
-            📸 Shared by your herd
+            <Camera size={16} aria-hidden="true" /> Shared by your Herd
           </div>
           <div className="stack">
             {sharedPhotos.map((p) => (
@@ -280,7 +307,7 @@ export default function Herd() {
       await addFeedback(user.id, photoId, emoji, message)
     } catch (e) {
       console.error(e)
-      showToast('Could not send feedback.', '⚠️')
+      showToast('Couldn’t send that. Try again.', '⚠️')
     }
   }
 
@@ -320,7 +347,11 @@ function SharedPhoto({
   return (
     <div className="card shared-photo">
       <div className="shared-photo-media">
-        {url ? <img src={url} alt="shared progress" /> : <div className="photo-skeleton" />}
+        {url ? (
+          <img src={url} alt={`Progress photo shared by your Herd, ${photo.taken_on}`} loading="lazy" decoding="async" />
+        ) : (
+          <div className="photo-skeleton" />
+        )}
         <div className="photo-meta">
           <span>{photo.taken_on}</span>
         </div>
@@ -339,7 +370,7 @@ function SharedPhoto({
 
       <div className="feedback-quick">
         {['🔥', '💪', '👏', '😍', '🐂'].map((e) => (
-          <button key={e} className="cheer-btn" onClick={() => onFeedback(e, '')} title="Send love">
+          <button key={e} className="cheer-btn" onClick={() => onFeedback(e, '')} title="Send love" aria-label={`React with ${e}`}>
             {e}
           </button>
         ))}
@@ -348,6 +379,7 @@ function SharedPhoto({
         <input
           className="input"
           placeholder="Say something encouraging…"
+          aria-label="Message"
           value={msg}
           onChange={(e) => setMsg(e.target.value)}
           style={{ flex: 1 }}
@@ -422,10 +454,10 @@ function PartnerBlock({
       setRules('')
       setDays(7)
       setShowForm(false)
-      showToast('Challenge set! May the best charge win 🐂', '🏁')
+      showToast('Challenge set. May the best one win.', '✅')
       await onChanged()
     } catch (e) {
-      showToast('Could not create the challenge.', '⚠️')
+      showToast('Couldn’t create the challenge. Try again.', '⚠️')
       console.error(e)
     } finally {
       setBusy(false)
@@ -440,10 +472,10 @@ function PartnerBlock({
         rules: herdRules.trim() || null,
       })
       setEditHerd(false)
-      showToast('Herd updated 🐂', '✅')
+      showToast('Herd updated.', '✅')
       await onChanged()
     } catch (e) {
-      showToast('Could not save the herd.', '⚠️')
+      showToast('Couldn’t save the Herd. Try again.', '⚠️')
       console.error(e)
     } finally {
       setSavingHerd(false)
@@ -458,10 +490,10 @@ function PartnerBlock({
     try {
       const url = await uploadHerdPhoto(me.id, partner.connectionId, await compressImage(file))
       await updateHerd(partner.connectionId, { photo_url: url })
-      showToast('Herd photo updated 📸', '✅')
+      showToast('Herd photo updated.', '✅')
       await onChanged()
     } catch (err) {
-      showToast('Could not upload the herd photo.', '⚠️')
+      showToast('Couldn’t upload the photo. Try again.', '⚠️')
       console.error(err)
     } finally {
       setSavingHerd(false)
@@ -477,9 +509,16 @@ function PartnerBlock({
           onClick={() => photoRef.current?.click()}
           disabled={savingHerd}
           title="Change herd photo"
+          aria-label="Change herd photo"
         >
-          {partner.herdPhoto ? <img src={partner.herdPhoto} alt="herd" /> : <span>🐂</span>}
-          <span className="avatar-cam">📷</span>
+          {partner.herdPhoto ? (
+            <img src={partner.herdPhoto} alt="" loading="lazy" decoding="async" />
+          ) : (
+            <Users size={24} aria-hidden="true" />
+          )}
+          <span className="avatar-cam" aria-hidden="true">
+            <Camera size={12} />
+          </span>
         </button>
         <input ref={photoRef} type="file" accept="image/*" hidden onChange={onPickHerdPhoto} />
         <div style={{ flex: 1 }}>
@@ -496,8 +535,9 @@ function PartnerBlock({
       {editHerd && (
         <div className="card stack" style={{ marginBottom: 12 }}>
           <div className="field">
-            <label>Herd name</label>
+            <label htmlFor={`herd-name-${partner.connectionId}`}>Herd name</label>
             <input
+              id={`herd-name-${partner.connectionId}`}
               className="input"
               value={herdName}
               onChange={(e) => setHerdName(e.target.value)}
@@ -505,8 +545,9 @@ function PartnerBlock({
             />
           </div>
           <div className="field">
-            <label>Herd rules</label>
+            <label htmlFor={`herd-rules-${partner.connectionId}`}>Herd rules</label>
             <textarea
+              id={`herd-rules-${partner.connectionId}`}
               className="input"
               rows={3}
               value={herdRules}
@@ -522,7 +563,10 @@ function PartnerBlock({
 
       {partner.herdRules && !editHerd && (
         <div className="herd-rules">
-          <strong>📜 Rules:</strong> {partner.herdRules}
+          <ScrollText size={16} aria-hidden="true" style={{ flex: '0 0 auto', marginTop: 2 }} />
+          <span>
+            <strong>Rules:</strong> {partner.herdRules}
+          </span>
         </div>
       )}
 
@@ -532,25 +576,30 @@ function PartnerBlock({
           <div className="partner-name" style={{ fontSize: 16 }}>
             {partnerName}
           </div>
-          <div className="faint" style={{ fontSize: 13 }}>
-            🏆 {partner.horns} horns · {partner.streak}🔥 streak
+          <div className="faint row" style={{ fontSize: 13, gap: '2px 12px', flexWrap: 'wrap' }}>
+            <span className="row" style={{ gap: 4, whiteSpace: 'nowrap' }}>
+              <Trophy size={12} aria-hidden="true" /> {partner.horns} Horns
+            </span>
+            <span className="row" style={{ gap: 4, whiteSpace: 'nowrap' }}>
+              <Flame size={12} aria-hidden="true" /> {partner.streak} day streak
+            </span>
           </div>
         </div>
         <button
           className="btn btn-ghost btn-sm"
           onClick={async () => {
             try { navigate(`/chat/${await getOrCreateDm(partner.userId)}`) }
-            catch { showToast('Could not open chat.', '⚠️') }
+            catch { showToast('Couldn’t open the chat. Try again.', '⚠️') }
           }}
         >
-          💬 Message
+          <MessageCircle size={16} aria-hidden="true" /> Message
         </button>
       </div>
 
       <div className="stack">
         {challenges.length === 0 && (
           <p className="faint" style={{ fontSize: 14, margin: '2px 2px 4px' }}>
-            No shared challenges yet, set one below.
+            No shared challenges yet. Set one below.
           </p>
         )}
         {challenges.map((ch) => (
@@ -569,8 +618,9 @@ function PartnerBlock({
         {showForm ? (
           <div className="card stack">
             <div className="field">
-              <label>Challenge</label>
+              <label htmlFor={`ch-title-${partner.connectionId}`}>Challenge</label>
               <input
+                id={`ch-title-${partner.connectionId}`}
                 className="input"
                 placeholder="e.g. Run every morning this week"
                 value={title}
@@ -578,8 +628,9 @@ function PartnerBlock({
               />
             </div>
             <div className="field">
-              <label>🏆 Reward for the winner</label>
+              <label htmlFor={`ch-reward-${partner.connectionId}`}>Reward for the winner</label>
               <input
+                id={`ch-reward-${partner.connectionId}`}
                 className="input"
                 placeholder="e.g. Loser buys dinner"
                 value={reward}
@@ -587,8 +638,9 @@ function PartnerBlock({
               />
             </div>
             <div className="field">
-              <label>😅 Forfeit for the loser</label>
+              <label htmlFor={`ch-forfeit-${partner.connectionId}`}>Forfeit for the loser</label>
               <input
+                id={`ch-forfeit-${partner.connectionId}`}
                 className="input"
                 placeholder="e.g. Post an embarrassing selfie"
                 value={forfeit}
@@ -596,8 +648,9 @@ function PartnerBlock({
               />
             </div>
             <div className="field">
-              <label>📜 Rules (optional)</label>
+              <label htmlFor={`ch-rules-${partner.connectionId}`}>Rules (optional)</label>
               <textarea
+                id={`ch-rules-${partner.connectionId}`}
                 className="input"
                 rows={2}
                 placeholder="e.g. Counts only if done before 8am. Photo proof required."
@@ -606,8 +659,8 @@ function PartnerBlock({
               />
             </div>
             <div className="field">
-              <label>Runs for</label>
-              <select className="select" value={days} onChange={(e) => setDays(Number(e.target.value))}>
+              <label htmlFor={`ch-days-${partner.connectionId}`}>Runs for</label>
+              <select id={`ch-days-${partner.connectionId}`} className="select" value={days} onChange={(e) => setDays(Number(e.target.value))}>
                 <option value={3}>3 days</option>
                 <option value={7}>1 week</option>
                 <option value={14}>2 weeks</option>
@@ -625,7 +678,7 @@ function PartnerBlock({
           </div>
         ) : (
           <button className="btn btn-ghost" onClick={() => setShowForm(true)}>
-            🏁 New shared challenge
+            <Flag size={18} aria-hidden="true" /> New shared challenge
           </button>
         )}
       </div>
@@ -668,10 +721,10 @@ function ChallengeCard({
     setBusy(true)
     try {
       await checkinToday(me.id, challenge.id)
-      showToast('Checked in! Keep charging 🐂', '✅')
+      showToast('Checked in. Keep going.', '✅')
       await onChanged()
     } catch (e) {
-      showToast('Could not check in, try again.', '⚠️')
+      showToast('Couldn’t check in. Try again.', '⚠️')
       console.error(e)
     } finally {
       setBusy(false)
@@ -684,7 +737,7 @@ function ChallengeCard({
       await deleteChallenge(challenge.id)
       await onChanged()
     } catch (e) {
-      showToast('Could not delete the challenge.', '⚠️')
+      showToast('Couldn’t delete the challenge. Try again.', '⚠️')
       console.error(e)
     }
   }
@@ -693,8 +746,13 @@ function ChallengeCard({
     <div className="card challenge-card">
       <div className="goal-top">
         <div className="goal-title">{challenge.title}</div>
-        <button className="link-btn" style={{ fontSize: 13 }} onClick={remove}>
-          Delete
+        <button
+          className="link-btn row"
+          style={{ fontSize: 13, gap: 4, color: 'var(--text-faint)' }}
+          onClick={remove}
+          aria-label={`Delete challenge ${challenge.title}`}
+        >
+          <Trash2 size={14} aria-hidden="true" /> Delete
         </button>
       </div>
 
@@ -713,18 +771,27 @@ function ChallengeCard({
       {(challenge.reward || challenge.forfeit) && (
         <div className="stakes">
           {challenge.reward && (
-            <div>
-              🏆 <strong>Reward:</strong> {challenge.reward}
+            <div className="row" style={{ gap: 8, alignItems: 'flex-start' }}>
+              <Trophy size={14} aria-hidden="true" style={{ flex: '0 0 auto', marginTop: 3 }} />
+              <span>
+                <strong>Reward:</strong> {challenge.reward}
+              </span>
             </div>
           )}
           {challenge.forfeit && (
-            <div>
-              😅 <strong>Forfeit:</strong> {challenge.forfeit}
+            <div className="row" style={{ gap: 8, alignItems: 'flex-start' }}>
+              <Frown size={14} aria-hidden="true" style={{ flex: '0 0 auto', marginTop: 3 }} />
+              <span>
+                <strong>Forfeit:</strong> {challenge.forfeit}
+              </span>
             </div>
           )}
           {challenge.rules && (
-            <div>
-              📜 <strong>Rules:</strong> {challenge.rules}
+            <div className="row" style={{ gap: 8, alignItems: 'flex-start' }}>
+              <ScrollText size={14} aria-hidden="true" style={{ flex: '0 0 auto', marginTop: 3 }} />
+              <span>
+                <strong>Rules:</strong> {challenge.rules}
+              </span>
             </div>
           )}
         </div>
@@ -733,8 +800,8 @@ function ChallengeCard({
       <div className="faint" style={{ fontSize: 12, marginTop: 8 }}>
         {ended
           ? leader === 'tie'
-            ? 'Finished, it’s a tie! 🤝'
-            : `Finished, ${leader === 'me' ? me.name : partnerName} won! 🎉`
+            ? 'Finished. It’s a tie.'
+            : `Finished. ${leader === 'me' ? me.name : partnerName} won.`
           : `Ends ${challenge.ends_on}`}
       </div>
 
@@ -745,7 +812,8 @@ function ChallengeCard({
           disabled={busy || checkedInToday}
           onClick={check}
         >
-          {checkedInToday ? '✓ Checked in today' : '✓ I did it today'}
+          <Check size={18} aria-hidden="true" />
+          {checkedInToday ? 'Checked in today' : 'I did it today'}
         </button>
       )}
 
@@ -756,7 +824,7 @@ function ChallengeCard({
         )}
         <span className="cheer-spacer" />
         {['🔥', '💪', '👏', '🐂'].map((e) => (
-          <button key={e} className="cheer-btn" onClick={() => onCheer(e)} title="Cheer">
+          <button key={e} className="cheer-btn" onClick={() => onCheer(e)} title="Cheer" aria-label={`Cheer with ${e}`}>
             {e}
           </button>
         ))}

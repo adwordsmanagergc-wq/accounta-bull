@@ -24,14 +24,14 @@ function isStandalone(): boolean {
 }
 
 const IOS_STEPS = [
-  { icon: '🧭', title: 'Open in Safari', body: 'Home Screen install only works from Safari on iPhone/iPad — not Chrome. If you’re in another browser, open accounta-bull.com in Safari first.' },
+  { icon: '🧭', title: 'Open in Safari', body: 'Home Screen install only works from Safari on iPhone and iPad, not Chrome. If you’re in another browser, open accounta-bull.com in Safari first.' },
   { icon: '⬆️', title: 'Tap the Share button', body: 'It’s the square with an arrow pointing up, at the bottom of the Safari screen (or top on iPad).' },
   { icon: '➕', title: 'Tap “Add to Home Screen”', body: 'Scroll down the share menu to find it. Then tap “Add” in the top-right corner.' },
-  { icon: '🐂', title: 'Open Accounta-Bull from your Home Screen', body: 'Use the new bull icon — not Safari. This full-screen app is the version that can send you notifications.' },
+  { icon: '🐂', title: 'Open Accounta-Bull from your Home Screen', body: 'Use the new bull icon, not Safari. This full-screen app is the version that can send you notifications.' },
 ]
 
 const ANDROID_STEPS = [
-  { icon: '🧭', title: 'Open in Chrome', body: 'Open accounta-bull.com in Chrome (or Edge). You may see an “Install app” banner pop up — if so, just tap it.' },
+  { icon: '🧭', title: 'Open in Chrome', body: 'Open accounta-bull.com in Chrome (or Edge). You may see an “Install app” banner pop up. If so, tap it.' },
   { icon: '⋮', title: 'Tap the menu (⋮)', body: 'The three dots in the top-right corner of Chrome.' },
   { icon: '➕', title: 'Tap “Install app” / “Add to Home screen”', body: 'Then confirm with “Install”. The app icon appears on your Home Screen.' },
   { icon: '🐂', title: 'Open Accounta-Bull from your Home Screen', body: 'Launch it from the new bull icon so it runs as a full app and can send notifications.' },
@@ -55,10 +55,10 @@ export default function InstallGuide() {
     setBusy(true)
     const result = await enablePush(user.id)
     setBusy(false)
-    if (result === 'ok') showToast('Notifications on 🔔 — even when the app is closed', '⚡')
+    if (result === 'ok') showToast('Notifications are on, even when the app is closed.', '✅')
     else if (result === 'denied') showToast('Blocked. Turn notifications on in your phone’s settings for this app.', '🔕')
     else if (result === 'unsupported') showToast('Open the installed app from your Home Screen first, then try again.', 'ℹ️')
-    else if (result === 'unconfigured') showToast('Push isn’t configured yet — you’ll still get nudges while the app is open.', 'ℹ️')
+    else if (result === 'unconfigured') showToast('Push isn’t configured yet. You’ll still get nudges while the app is open.', 'ℹ️')
     else showToast('Could not enable, try again.', '⚠️')
   }
 
@@ -68,7 +68,7 @@ export default function InstallGuide() {
       <div className="page-head"><h1>Get the app</h1></div>
 
       <p className="muted" style={{ marginTop: -6, marginBottom: 16, lineHeight: 1.5 }}>
-        Add Accounta-Bull to your Home Screen so it opens like a real app — full screen, faster,
+        Add Accounta-Bull to your Home Screen so it opens like a real app: full screen, faster,
         and able to send you charge-call notifications even when it’s closed.
       </p>
 
@@ -127,7 +127,7 @@ export default function InstallGuide() {
             <div className="step-title">🔔 Tap “Enable”</div>
             <div className="step-body">
               On this page or your Profile, tap Enable and choose <strong>Allow</strong> when your
-              phone asks. That’s it — you’ll get a charge call 30 minutes before each goal.
+              phone asks. That’s it. You’ll get a Charge Call 30 minutes before each goal.
             </div>
           </div>
         </div>

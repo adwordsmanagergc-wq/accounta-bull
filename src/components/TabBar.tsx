@@ -1,23 +1,22 @@
 import { NavLink } from 'react-router-dom'
-
-const crest = `${import.meta.env.BASE_URL}accountabullcrest.webp`
+import { Home, Plus, User, Users } from 'lucide-react'
 
 const tabs = [
-  { to: '/today', label: 'Today', ico: '🎯' },
-  { to: '/goal', label: 'Add Goal', ico: '➕' },
-  { to: '/herd', label: 'Herd', ico: '🤝' },
-  { to: '/profile', label: 'Profile', img: crest },
+  { to: '/today', label: 'Today', Icon: Home },
+  { to: '/goal', label: 'Add goal', Icon: Plus },
+  { to: '/herd', label: 'Herd', Icon: Users },
+  { to: '/profile', label: 'Profile', Icon: User },
 ]
 
 export default function TabBar() {
   return (
-    <nav className="tabbar">
-      {tabs.map((t) => (
-        <NavLink key={t.to} to={t.to} className={({ isActive }) => (isActive ? 'active' : '')} end>
-          <span className="tab-ico">
-            {t.img ? <img className="tab-ico-img" src={t.img} alt="" /> : t.ico}
+    <nav className="tabbar" aria-label="App">
+      {tabs.map(({ to, label, Icon }) => (
+        <NavLink key={to} to={to} className={({ isActive }) => (isActive ? 'active' : '')} end>
+          <span className="tab-ico" aria-hidden="true">
+            <Icon size={22} strokeWidth={1.75} />
           </span>
-          <span className="tab-label">{t.label}</span>
+          <span className="tab-label">{label}</span>
         </NavLink>
       ))}
     </nav>
