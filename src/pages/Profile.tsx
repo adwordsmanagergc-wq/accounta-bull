@@ -126,7 +126,7 @@ export default function Profile() {
 
   useEffect(() => {
     checkSubscription()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [])
 
   async function enableNotifications() {

@@ -8,7 +8,7 @@ export const supabaseConfigured =
   !!url && !!anonKey && !url.includes('YOUR-PROJECT') && !anonKey.includes('YOUR-ANON')
 
 if (!supabaseConfigured) {
-  // eslint-disable-next-line no-console
+   
   console.warn(
     '[Accounta-Bull] Supabase is not configured. Copy .env.example to .env and add ' +
       'your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then restart `npm run dev`.'

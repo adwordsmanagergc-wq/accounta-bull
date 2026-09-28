@@ -1,6 +1,23 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import Logo from '../components/Logo'
+import {
+  AlertTriangle,
+  Brain,
+  Briefcase,
+  Check,
+  CheckCircle2,
+  ChevronRight,
+  CircleCheckBig,
+  Dumbbell,
+  Flame,
+  Pencil,
+  Plus,
+  Star,
+  Target,
+  Trophy,
+  Zap,
+  type LucideIcon,
+} from 'lucide-react'
 import CompletionCapture from '../components/CompletionCapture'
 import Celebration from '../components/Celebration'
 import CountUp from '../components/CountUp'
@@ -9,23 +26,30 @@ import { useAuth } from '../context/AuthContext'
 import { useToast } from '../context/ToastContext'
 import { completeGoal, fetchGoals, fetchTodayCompletions } from '../lib/api'
 import { chargeLevel, hasCommitted, inBoostWindow, isScheduledToday, whenLabel } from '../lib/game'
-import { CATEGORIES, type Completion, type Goal } from '../lib/types'
+import { CATEGORIES, type Category, type Completion, type Goal } from '../lib/types'
 
-const STEPS = [
+const CAT_ICON: Record<Category, LucideIcon> = {
+  fitness: Dumbbell,
+  work: Briefcase,
+  mind: Brain,
+  other: Star,
+}
+
+const STEPS: { icon: LucideIcon; title: string; body: string }[] = [
   {
-    emoji: '🎯',
+    icon: Target,
     title: 'Set a goal',
-    body: 'Pick something you want to do, a workout, deep work, a walk, and choose the time and days it repeats.',
+    body: 'A workout, a deep work block, a walk. Pick the time and the days it repeats.',
   },
   {
-    emoji: '⚡',
+    icon: Zap,
     title: 'Get your Charge Call',
-    body: '30 minutes before, we’ll boost you with a notification and a hype message so you actually start.',
+    body: 'About 30 minutes before, you get a notification with a short message so you actually start.',
   },
   {
-    emoji: '🏆',
+    icon: CircleCheckBig,
     title: 'Check it off',
-    body: 'Every win earns you horns and builds your daily streak. Miss one after committing and it costs you.',
+    body: 'Every goal you finish earns Horns and builds your streak. Skip one you committed to and it costs you.',
   },
 ]
 
@@ -110,12 +134,12 @@ export default function Today() {
       }))
       successHaptic()
       setCelebrate(true)
-      showToast(`+${goal.horn_value} horns! Total ${newTotal} 🏆`, '🐂')
+      showToast(`+${goal.horn_value} Horns. Total ${newTotal}.`, '🏆')
       // Let the burst breathe for a moment before the capture modal opens.
       window.setTimeout(() => setCapture(goal), 850)
     } catch (e) {
       errorHaptic()
-      showToast('Could not save, try again.', '⚠️')
+      showToast('Couldn’t save that. Try again.', '⚠️')
       console.error(e)
     } finally {
       setBusy(null)
@@ -138,12 +162,26 @@ export default function Today() {
           <h1>Today</h1>
           <div className="today-date">{todayDate}</div>
         </div>
-        <div className="pill">🏆 <CountUp value={profile?.horns ?? 0} /></div>
+        <div className="row" style={{ gap: 8 }}>
+          {(profile?.streak ?? 0) > 0 && (
+            <div className="pill" aria-label={`${profile?.streak} day streak`}>
+              <Flame size={14} aria-hidden="true" style={{ color: 'var(--accent)' }} />
+              {profile?.streak}
+            </div>
+          )}
+          <div className="pill" aria-label={`${profile?.horns ?? 0} Horns`}>
+            <Trophy size={14} aria-hidden="true" style={{ color: 'var(--accent)' }} />
+            <CountUp value={profile?.horns ?? 0} />
+          </div>
+        </div>
       </div>
 
       {error && (
-        <div className="card" style={{ marginBottom: 16 }}>
-          <p style={{ margin: '0 0 12px' }}>⚠️ {error}</p>
+        <div className="card" style={{ marginBottom: 16 }} role="alert">
+          <div className="row" style={{ alignItems: 'flex-start', marginBottom: 12 }}>
+            <AlertTriangle size={18} aria-hidden="true" style={{ color: 'var(--danger)', flex: '0 0 auto' }} />
+            <p style={{ margin: 0 }}>{error}</p>
+          </div>
           <button className="btn btn-ghost" onClick={load}>
             Try again
           </button>
@@ -152,37 +190,38 @@ export default function Today() {
 
       {/* No spinner: the page just fills in once data is ready. */}
       {loaded && !error && todays.length === 0 && (
-        /* Warm daily welcome when nothing is scheduled for today */
+        /* Daily welcome when nothing is scheduled for today */
         <div className="welcome">
-          <div className="welcome-crest"><Logo size={120} glow /></div>
+          <span className="icon-tile lg" aria-hidden="true">
+            <Target size={26} />
+          </span>
           <h2 className="welcome-title">
-            {firstName ? `Ready to charge, ${firstName}?` : 'Ready to charge?'}
+            {firstName ? `Ready when you are, ${firstName}.` : 'Ready when you are.'}
           </h2>
           <p className="welcome-sub">
-            Nothing on your list for today yet, <strong>shall we add some tasks?</strong> Every
-            strong day starts with one goal. 💪
+            Nothing is scheduled for today yet. Add a goal and we’ll send a Charge Call before it
+            starts.
           </p>
 
           <Link to="/goal" className="btn btn-primary btn-lg">
-            ➕ Add today’s first task
+            <Plus size={18} aria-hidden="true" /> Add today’s first goal
           </Link>
 
           {isNewMember && (
             <>
-              <div className="steps-heading">New here? Here’s how it works</div>
-              <div className="steps">
+              <div className="steps-heading">How it works</div>
+              <ol className="steps" style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {STEPS.map((s, i) => (
-                  <div className="step" key={s.title}>
+                  <li className="step" key={s.title}>
                     <div className="step-num">{i + 1}</div>
                     <div>
-                      <div className="step-title">
-                        {s.emoji} {s.title}
-                      </div>
+                      <div className="step-title">{s.title}</div>
                       <div className="step-body">{s.body}</div>
                     </div>
-                  </div>
+                    <s.icon size={18} aria-hidden="true" style={{ marginLeft: 'auto', color: 'var(--text-faint)', flex: '0 0 auto' }} />
+                  </li>
                 ))}
-              </div>
+              </ol>
             </>
           )}
         </div>
@@ -191,48 +230,68 @@ export default function Today() {
       {loaded && !error && todays.length > 0 && (
         <>
           {upcoming && (
-            <div
+            <button
+              type="button"
               className="charge-banner"
               onClick={() => navigate(`/boost/${upcoming.id}`)}
-              role="button"
             >
-              <div className="cb-kicker">⚡ CHARGE CALL</div>
-              <div className="cb-title">{upcoming.title}</div>
-              <div style={{ fontSize: 14 }}>{whenLabel(upcoming)}, tap to get your boost</div>
-            </div>
+              <span className="icon-tile" aria-hidden="true">
+                <Zap size={20} />
+              </span>
+              <span style={{ flex: 1, minWidth: 0 }}>
+                <span className="cb-kicker">Charge Call</span>
+                <span className="cb-title" style={{ display: 'block' }}>{upcoming.title}</span>
+                <span className="muted" style={{ fontSize: 14 }}>
+                  {whenLabel(upcoming)}. Tap for your boost.
+                </span>
+              </span>
+              <ChevronRight size={20} aria-hidden="true" style={{ color: 'var(--text-faint)' }} />
+            </button>
           )}
 
           <div className="today-summary">
-            {doneToday === todays.length
-              ? `🔥 All ${todays.length} done today, you’re on fire!`
-              : `${doneToday} of ${todays.length} done today`}
+            <span>
+              {doneToday === todays.length
+                ? `All ${todays.length} done today. Strong work.`
+                : `${doneToday} of ${todays.length} done today`}
+            </span>
+            <div className="target-bar" style={{ width: 96 }} aria-hidden="true">
+              <div className="target-fill" style={{ width: `${Math.round((doneToday / todays.length) * 100)}%` }} />
+            </div>
           </div>
 
           <div className="stack">
             {todays.map((g) => {
               const done = !!completions[g.id]
               const cat = catOf(g)
+              const CatIcon = CAT_ICON[g.category] ?? Star
               return (
                 <div className={`card goal-card ${done ? 'goal-done' : ''}`} data-cat={g.category} key={g.id}>
                   <div className="goal-top">
-                    <div>
+                    <div style={{ minWidth: 0 }}>
                       <div className="goal-title">{g.title}</div>
                       <div className="goal-meta">
-                        {whenLabel(g)} · {g.horn_value} horns
+                        <span>{whenLabel(g)}</span>
+                        <span aria-hidden="true">·</span>
+                        <span>{g.horn_value} Horns</span>
                         {g.stake_horns > 0 ? (
-                          <span className="stake-tag">⚡ {g.stake_horns} at stake</span>
+                          <span className="stake-tag">
+                            <Zap size={11} aria-hidden="true" /> {g.stake_horns} at stake
+                          </span>
                         ) : g.forfeit ? (
-                          <span className="stake-tag">⚡ forfeit</span>
+                          <span className="stake-tag">
+                            <Zap size={11} aria-hidden="true" /> Forfeit
+                          </span>
                         ) : null}
                       </div>
                     </div>
                     <span className="cat-chip">
-                      {cat?.emoji} {cat?.label}
+                      <CatIcon size={12} aria-hidden="true" /> {cat?.label}
                     </span>
                   </div>
 
                   {!done && (
-                    <div className="meter" title="Charge meter">
+                    <div className="meter" title="Charge meter" aria-hidden="true">
                       <div
                         className="meter-fill"
                         style={{ width: `${Math.round(chargeLevel(g) * 100)}%` }}
@@ -242,29 +301,39 @@ export default function Today() {
 
                   <div className="goal-actions">
                     {done ? (
-                      <span className="done-check">✓ Done, horns earned</span>
+                      <span className="done-check">
+                        <CheckCircle2 size={16} aria-hidden="true" /> Done. Horns earned.
+                      </span>
                     ) : (
                       <>
                         <button
                           className="btn btn-primary"
                           disabled={busy === g.id}
+                          aria-busy={busy === g.id || undefined}
                           onClick={() => onComplete(g)}
                         >
-                          {busy === g.id ? '…' : '✓ Check off'}
+                          {busy === g.id ? (
+                            <span className="btn-spinner" aria-hidden="true" />
+                          ) : (
+                            <Check size={18} aria-hidden="true" />
+                          )}
+                          Check off
                         </button>
                         <button
                           className="btn btn-ghost btn-icon"
                           title="Get a boost"
+                          aria-label={`Get a boost for ${g.title}`}
                           onClick={() => navigate(`/boost/${g.id}`)}
                         >
-                          ⚡
+                          <Zap size={18} aria-hidden="true" />
                         </button>
                         <button
                           className="btn btn-ghost btn-icon"
                           title="Edit goal"
+                          aria-label={`Edit ${g.title}`}
                           onClick={() => navigate(`/goal/${g.id}`)}
                         >
-                          ✏️
+                          <Pencil size={18} aria-hidden="true" />
                         </button>
                       </>
                     )}
@@ -273,8 +342,8 @@ export default function Today() {
               )
             })}
 
-            <Link to="/goal" className="btn btn-ghost btn-lg" style={{ marginTop: 4 }}>
-              ➕ Add another goal
+            <Link to="/goal" className="btn btn-ghost btn-lg" style={{ marginTop: 16 }}>
+              <Plus size={18} aria-hidden="true" /> Add another goal
             </Link>
           </div>
         </>

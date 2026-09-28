@@ -5,7 +5,16 @@ import { useState } from 'react'
 const primary = `${import.meta.env.BASE_URL}accountabullcrest.webp`
 const fallback = `${import.meta.env.BASE_URL}logo.svg`
 
-export default function Logo({ size = 200, glow = false }: { size?: number; glow?: boolean }) {
+export default function Logo({
+  size = 36,
+  alt = 'Accounta-Bull',
+  className,
+}: {
+  size?: number
+  /** Pass an empty string when the mark sits next to visible brand text. */
+  alt?: string
+  className?: string
+}) {
   const [src, setSrc] = useState(primary)
   return (
     <img
@@ -13,9 +22,10 @@ export default function Logo({ size = 200, glow = false }: { size?: number; glow
       onError={() => src !== fallback && setSrc(fallback)}
       width={size}
       height={size}
-      alt="Accounta-Bull"
-      className={glow ? 'logo-glow' : undefined}
-      style={{ width: size, height: 'auto', display: 'block' }}
+      alt={alt}
+      className={className}
+      decoding="async"
+      style={{ width: size, height: size, objectFit: 'contain', display: 'block' }}
     />
   )
 }

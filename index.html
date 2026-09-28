@@ -2,38 +2,78 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/webp" href="/accountabullcrest.webp" />
-    <link rel="apple-touch-icon" href="/icon-180.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Accounta-Bull · Daily accountability for fitness and work goals</title>
+    <meta
+      name="description"
+      content="Set daily fitness and work goals, get a Charge Call before each one, and let your Herd keep you honest. Earn Horns for every goal you finish. Free during early access."
+    />
+    <link rel="canonical" href="https://accounta-bull.com/" />
+    <meta name="theme-color" content="#0A0F1C" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Accounta-Bull" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <meta name="theme-color" content="#0A1628" />
-    <meta name="description" content="Accounta-Bull, set daily fitness and work goals, get a charge call before each one, and earn horns for showing up." />
-    <title>Accounta-Bull, daily goals, charge calls, and horns</title>
 
-    <!-- Social sharing (Open Graph + Twitter) -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Accounta-Bull" />
-    <meta property="og:title" content="Accounta-Bull" />
-    <meta property="og:description" content="Set daily fitness and work goals, get a charge call before each one, and earn horns for showing up." />
     <meta property="og:url" content="https://accounta-bull.com/" />
-    <meta property="og:image" content="https://accounta-bull.com/og-image.png" />
+    <meta property="og:title" content="Accounta-Bull · Show up for your goals. Every day." />
+    <meta
+      property="og:description"
+      content="Daily fitness and work goals, a Charge Call before each one, and a Herd that keeps you honest. Free during early access."
+    />
+    <meta property="og:image" content="https://accounta-bull.com/og.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Accounta-Bull: Show up for your goals. Every day." />
+
+    <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Accounta-Bull" />
-    <meta name="twitter:description" content="Set daily goals, get a charge call before each one, and earn horns for showing up." />
-    <meta name="twitter:image" content="https://accounta-bull.com/og-image.png" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
+    <meta name="twitter:title" content="Accounta-Bull · Show up for your goals. Every day." />
+    <meta
+      name="twitter:description"
+      content="Daily fitness and work goals, a Charge Call before each one, and a Herd that keeps you honest."
     />
+    <meta name="twitter:image" content="https://accounta-bull.com/og.png" />
+    <meta name="twitter:image:alt" content="Accounta-Bull: Show up for your goals. Every day." />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Accounta-Bull",
+        "url": "https://accounta-bull.com/",
+        "applicationCategory": "HealthApplication",
+        "operatingSystem": "Web, iOS, Android",
+        "description": "Daily accountability for fitness and work goals: set goals, get a Charge Call before each one, check in with your Herd and earn Horns.",
+        "image": "https://accounta-bull.com/og.png",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "description": "Free during early access"
+        }
+      }
+    </script>
   </head>
   <body>
+    <noscript>
+      <p style="font-family: system-ui, sans-serif; color: #f4f6fa; background: #0a0f1c; padding: 24px">
+        Accounta-Bull needs JavaScript to run. Please enable it and reload.
+      </p>
+    </noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

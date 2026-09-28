@@ -4,6 +4,9 @@ import { HashRouter } from 'react-router-dom'
 import App from './App'
 import { AuthProvider } from './context/AuthContext'
 import { ToastProvider } from './context/ToastContext'
+import '@fontsource-variable/inter'
+import '@fontsource-variable/inter-tight'
+import './styles/tokens.css'
 import './index.css'
 
 // HashRouter (URLs like /accountabull-web/#/today) means GitHub Pages never
